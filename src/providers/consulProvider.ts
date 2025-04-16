@@ -6,9 +6,9 @@ import type { ConsulOptions } from 'consul/lib/consul';
 export class ConsulProvider {
     private _consul: Consul | undefined;
     private _onDidChangeKVTreeData: vscode.EventEmitter<void | KVTreeItem | null> = new vscode.EventEmitter<void | KVTreeItem | null>();
-    private _onDidChangeServiceTreeData: vscode.EventEmitter<void | ServiceTreeItem | null> = new vscode.EventEmitter<void | ServiceTreeItem | null>();
+    private _onDidChangeServiceTreeData: vscode.EventEmitter<void | CatalogTreeItem | null> = new vscode.EventEmitter<void | CatalogTreeItem | null>();
     readonly onDidChangeKVTreeData: vscode.Event<void | KVTreeItem | null> = this._onDidChangeKVTreeData.event;
-    readonly onDidChangeServiceTreeData: vscode.Event<void | ServiceTreeItem | null> = this._onDidChangeServiceTreeData.event;
+    readonly onDidChangeServiceTreeData: vscode.Event<void | CatalogTreeItem | null> = this._onDidChangeServiceTreeData.event;
 
     private cfg: ConsulOptions | undefined;
     private _isConnected: boolean = false;
@@ -27,7 +27,7 @@ export class ConsulProvider {
         if(!this.cfg){
             return null;
         }
-        return JSON.parse(JSON.stringify(this.cfg))
+        return JSON.parse(JSON.stringify(this.cfg));
     }
     public getURLString(){
         if(!this._isConnected){
@@ -152,7 +152,7 @@ export class ConsulProvider {
         });
     }
 
-    public async getServices(): Promise<ServiceTreeItem[]> {
+    public async getServices(): Promise<CatalogTreeItem[]> {
         if (!this._consul) {
             return [];
         }
@@ -160,9 +160,9 @@ export class ConsulProvider {
         try {
             const services = await this._consul.catalog.service.list() as Record<string, string[]>;
             return Object.entries(services).map(([name, tags]) => {
-                return new ServiceTreeItem(
+                return new CatalogTreeItem(
                     name,
-                    tags,
+                    // tags,
                     vscode.TreeItemCollapsibleState.None,
                 );
             });
@@ -283,18 +283,24 @@ export class KVTreeItem extends vscode.TreeItem {
     static parseKey(uri: vscode.Uri): string {
         return uri.path.replace(/^\//, '');
     }
+    static rootItem(provider: ConsulProvider | undefined): KVTreeItem {
+        return new KVTreeItem('Key/Value', '', vscode.TreeItemCollapsibleState.Collapsed, 'kvRoot', provider);
+    }
 }
 
-export class ServiceTreeItem extends vscode.TreeItem {
+export class CatalogTreeItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
-        public readonly tags: string[],
+        // public readonly tags: string[],
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     ) {
         super(label, collapsibleState);
-        this.tooltip = `${label} [${tags.join(', ')}]`;
-        this.description = tags.join(', ');
+        // this.tooltip = `${label} [${tags.join(', ')}]`;
+        // this.description = tags.join(', ');
         this.contextValue = 'service';
+    }
+    static rootItem(provider: ConsulProvider | undefined): CatalogTreeItem {
+        return new CatalogTreeItem('Catalog', vscode.TreeItemCollapsibleState.Collapsed);
     }
 }
 
