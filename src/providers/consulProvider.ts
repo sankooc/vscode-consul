@@ -258,8 +258,7 @@ export class KVTreeItem extends vscode.TreeItem {
         super(label, collapsibleState);
         this.tooltip = `${key}`;
         this.description = '';
-        
-        // 为叶子节点添加编辑命令
+
         if (this.contextValue === 'kvLeaf') {
             this.command = {
                 command: 'consul.openKVEditor',
@@ -267,10 +266,8 @@ export class KVTreeItem extends vscode.TreeItem {
                 arguments: [this]
             };
         }
-
-        // 设置图标
         if (this.contextValue === 'kvRoot') {
-            this.iconPath = new vscode.ThemeIcon('versions');
+            this.iconPath = new vscode.ThemeIcon('repo');
         } else if (this.contextValue === 'kvLeaf') {
             this.iconPath = new vscode.ThemeIcon('gist');
         } else {
@@ -285,7 +282,7 @@ export class KVTreeItem extends vscode.TreeItem {
         return uri.path.replace(/^\//, '');
     }
     static rootItem(provider: ConsulProvider | undefined): KVTreeItem {
-        return new KVTreeItem('Key/Value2', '', vscode.TreeItemCollapsibleState.Collapsed, 'kvRoot', provider);
+        return new KVTreeItem('Key/Value', '', vscode.TreeItemCollapsibleState.Collapsed, 'kvRoot', provider);
     }
 }
 
@@ -301,6 +298,13 @@ export class CatalogTreeItem extends vscode.TreeItem {
         // this.tooltip = `${label} [${tags.join(', ')}]`;
         // this.description = tags.join(', ');
         this.contextValue = 'service';
+        switch(this.type){
+            case 'root':
+                this.iconPath = new vscode.ThemeIcon('project');
+                break;
+            default:
+                this.iconPath = new vscode.ThemeIcon('symbol-function');
+        }
     }
     static rootItem(provider: ConsulProvider | undefined): CatalogTreeItem {
         return new CatalogTreeItem('Catalog', 'root', vscode.TreeItemCollapsibleState.Collapsed, provider);
