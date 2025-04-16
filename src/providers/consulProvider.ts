@@ -162,8 +162,9 @@ export class ConsulProvider {
             return Object.entries(services).map(([name, tags]) => {
                 return new CatalogTreeItem(
                     name,
-                    // tags,
+                    'service',
                     vscode.TreeItemCollapsibleState.None,
+                    this
                 );
             });
         } catch (error) {
@@ -284,15 +285,17 @@ export class KVTreeItem extends vscode.TreeItem {
         return uri.path.replace(/^\//, '');
     }
     static rootItem(provider: ConsulProvider | undefined): KVTreeItem {
-        return new KVTreeItem('Key/Value', '', vscode.TreeItemCollapsibleState.Collapsed, 'kvRoot', provider);
+        return new KVTreeItem('Key/Value2', '', vscode.TreeItemCollapsibleState.Collapsed, 'kvRoot', provider);
     }
 }
 
 export class CatalogTreeItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
+        public readonly type: string,
         // public readonly tags: string[],
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+        public readonly provider: ConsulProvider | undefined,
     ) {
         super(label, collapsibleState);
         // this.tooltip = `${label} [${tags.join(', ')}]`;
@@ -300,7 +303,7 @@ export class CatalogTreeItem extends vscode.TreeItem {
         this.contextValue = 'service';
     }
     static rootItem(provider: ConsulProvider | undefined): CatalogTreeItem {
-        return new CatalogTreeItem('Catalog', vscode.TreeItemCollapsibleState.Collapsed);
+        return new CatalogTreeItem('Catalog', 'root', vscode.TreeItemCollapsibleState.Collapsed, provider);
     }
 }
 

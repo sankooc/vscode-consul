@@ -53,7 +53,6 @@ export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulIns
                 return [];
             }
             return [
-                // new KVTreeItem('Key/Value', '', vscode.TreeItemCollapsibleState.Collapsed, 'kvRoot', element.provider),
                 KVTreeItem.rootItem(element.provider),
                 CatalogTreeItem.rootItem(element.provider),
             ];
@@ -68,7 +67,8 @@ export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulIns
             return element.children || [];
         }
         if (element instanceof CatalogTreeItem) {
-            return []; // TODO
+            const provider = element.provider;
+            return provider && provider.isConnected ? provider.getServices() : [];
         }
 
         return [];
@@ -77,7 +77,6 @@ export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulIns
     async addConsulInstance(label: string) {
         const provider = new ConsulProvider(label);
         try {
-            // await provider.login(token);
             this.consulInstances.set(label, provider);
             await this.persistInstances();
             this._onDidChangeTreeData.fire();
@@ -91,7 +90,6 @@ export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulIns
         if (provider) {
             try {
                 await provider.connect();
-                // await this.persistInstances();
                 this._onDidChangeTreeData.fire();
             } catch (error) {
                 throw new Error(`Failed to connect to Consul: ${error}`);
