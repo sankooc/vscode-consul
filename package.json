@@ -1,0 +1,179 @@
+{
+  "name": "vs-consul",
+  "displayName": "VS Code Consul",
+  "description": "Consul integration for VS Code",
+  "version": "0.0.1",
+  "engines": {
+		"vscode": "^1.86.2"
+  },
+  "categories": [
+    "Other"
+  ],
+  "publisher": "sankooc",
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "consul-explorer",
+          "title": "Consul Explorer",
+          "icon": "resources/consul.svg"
+        }
+      ]
+    },
+    "views": {
+      "consul-explorer": [
+        {
+          "id": "consulInstances",
+          "name": "Consul Instances"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "consul.addInstance",
+        "title": "Add Consul Instance",
+        "icon": "$(add)"
+      },
+      {
+        "command": "consul.removeInstance",
+        "title": "Remove Consul Instance",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "consul.connect",
+        "title": "Connect",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "consul.disconnect",
+        "title": "Disconnect",
+        "icon": "$(debug-disconnect)"
+      },
+      {
+        "command": "consul.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "consul.refreshKV",
+        "title": "Refresh KV",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "consul.addKV",
+        "title": "Add Key/Value",
+        "icon": "$(add)"
+      },
+      {
+        "command": "consul.editKV",
+        "title": "Edit Value",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "consul.deleteKV",
+        "title": "Delete Key",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "consul.configureInstance",
+        "title": "Configure Consul Instance",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "consul.deleteKVPair",
+        "title": "Delete KV Pair",
+        "icon": "$(trash)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "consul.addInstance",
+          "when": "view == consulInstances",
+          "group": "navigation"
+        },
+        {
+          "command": "consul.refresh",
+          "when": "view == consulInstances",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "consul.removeInstance",
+          "when": "viewItem == consulInstanceConnected || viewItem == consulInstanceDisconnected",
+          "group": "inline"
+        },
+        {
+          "command": "consul.connect",
+          "when": "viewItem == consulInstanceDisconnected",
+          "group": "inline"
+        },
+        {
+          "command": "consul.disconnect",
+          "when": "viewItem == consulInstanceConnected",
+          "group": "inline"
+        },
+        {
+          "command": "consul.addKV",
+          "when": "viewItem == kvRoot",
+          "group": "inline"
+        },
+        {
+          "command": "consul.editKV",
+          "when": "viewItem == kvItem",
+          "group": "inline"
+        },
+        {
+          "command": "consul.deleteKV",
+          "when": "viewItem == kvItem",
+          "group": "inline"
+        },
+        {
+          "command": "consul.refreshKV",
+          "when": "viewItem == kvRoot",
+          "group": "inline"
+        },
+        {
+          "command": "consul.configureInstance",
+          "when": "view == consulInstances && viewItem == consulInstanceDisconnected",
+          "group": "inline"
+        },
+        {
+          "command": "consul.deleteKVPair",
+          "when": "viewItem == kvLeaf",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile && npm run build-webview",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test",
+    "build-webview": "esbuild media/webview/toolkit.js --bundle --outfile=media/webview/toolkit.bundle.js --format=esm --platform=browser"
+  },
+  "dependencies": {
+    "@vscode/webview-ui-toolkit": "^1.4.0",
+    "consul": "file:../node-consul"
+  },
+  "devDependencies": {
+    "@types/consul": "^0.40.3",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.99.1",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "@vscode/test-cli": "^0.0.9",
+    "@vscode/test-electron": "^2.4.0",
+    "esbuild": "^0.21.5",
+    "eslint": "^8.57.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.4.5"
+  }
+}
