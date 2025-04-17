@@ -3,7 +3,6 @@ import { ConsulTreeDataProvider } from "../providers/treeDataProvider";
 import vscode from 'vscode';
 
 export const build = (context: vscode.ExtensionContext, consulTreeProvider: ConsulTreeDataProvider): vscode.Disposable[] => {
-    
     class ConsulKVFileSystemProvider implements vscode.FileSystemProvider {
         private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
         private _contents = new Map<string, Uint8Array>();
@@ -161,4 +160,4 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
     });
 
     return [addKVCommand, refreshKVCommand, deleteKVCommand, openKVEditorCommand];
-}
+};

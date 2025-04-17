@@ -6,6 +6,10 @@
   "engines": {
 		"vscode": "^1.86.2"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sankooc/vscode-consul.git"
+  },
   "categories": [
     "Other"
   ],
@@ -179,6 +183,10 @@
     "test": "vscode-test",
     "build-webview": "esbuild media/webview/toolkit.js --bundle --outfile=media/webview/toolkit.bundle.js --format=esm --platform=browser"
   },
+  "vsce": {
+		"dependencies": false,
+		"pnpm": true
+	},
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.4.0",
     "consul": "file:../node-consul"
@@ -187,7 +195,7 @@
     "@types/consul": "^0.40.3",
     "@types/mocha": "^10.0.6",
     "@types/node": "20.x",
-    "@types/vscode": "^1.99.1",
+		"@types/vscode": "^1.86.2",
     "@typescript-eslint/eslint-plugin": "^7.11.0",
     "@typescript-eslint/parser": "^7.11.0",
     "@vscode/test-cli": "^0.0.9",

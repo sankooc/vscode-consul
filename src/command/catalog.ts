@@ -32,6 +32,6 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
         //     language: 'json'
         // });
         await vscode.window.showTextDocument(doc);
-    })
+    });
     return [edit];
 };

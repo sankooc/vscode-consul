@@ -1,51 +1,37 @@
-# vs-consul README
+# VSCode for Consul
 
-This is the README for your extension "vs-consul". After writing up a brief description, we recommend including the following sections.
+**VSCode for Consul** is a Visual Studio Code extension that integrates HashiCorp Consul functionalities directly into your IDE, enabling seamless service discovery and configuration management.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Consul Instances Management**: Add, remove, connect, and disconnect Consul instances directly from the VS Code interface.
+- **Key/Value Store Management**: Perform CRUD operations on Consul's KV store with ease.
+- **Catalog Browsing**: Explore and view details of services and nodes registered in Consul's catalog.
+- **Configuration Interface**: Provides a configuration page for Consul instances that are not yet connected, allowing you to set connection options with save, cancel, and test connection functionalities.
 
-For example if there is an image subfolder under your extension project workspace:
+## Usage
 
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- **Manage Consul Instances**: Use the activity bar to add or remove Consul instances.
+- **Explore Catalog**: Navigate through the Consul catalog to view services and nodes.
+- **Edit KV Pairs**: Select a KV leaf node to open an editor for modifying key-value pairs.
+- **Configure Instances**: Click the configuration button on disconnected instances to open the settings page.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- Visual Studio Code version 1.86.2 or higher.
+- Node.js and npm installed on your machine.
 
-## Extension Settings
+## Contributing
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.
 
-For example:
+## License
 
-This extension contributes the following settings:
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+## Acknowledgments
 
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+- Thanks to the developers of [HashiCorp Consul](https://www.consul.io/) for providing a robust service discovery and configuration tool.
 
 ---
 
@@ -54,18 +40,5 @@ Added features X, Y, and Z.
 Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
 
 * [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
 
 **Enjoy!**
