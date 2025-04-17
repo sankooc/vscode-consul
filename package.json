@@ -1,8 +1,8 @@
 {
   "name": "vscode-consul",
-  "displayName": "VSCode for Consul",
+  "displayName": "VSConsul",
   "description": "Consul integration for VS Code",
-  "version": "0.0.1-preview",
+  "version": "0.0.1",
   "engines": {
 		"vscode": "^1.86.2"
   },

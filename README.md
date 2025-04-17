@@ -1,6 +1,11 @@
 # VSCode for Consul
 
+
+
 **VSCode for Consul** is a Visual Studio Code extension that integrates HashiCorp Consul functionalities directly into your IDE, enabling seamless service discovery and configuration management.
+
+
+![](https://i.ibb.co/ksLSxSMR/vsconsul.png)
 
 ## Features
 
