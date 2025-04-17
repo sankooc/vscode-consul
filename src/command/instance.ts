@@ -1,5 +1,5 @@
 import { ConsulOptions } from "consul/lib/consul";
-import { ConsulInstanceTreeItem, ConsulProvider, KVTreeItem } from "../providers/consulProvider";
+import { ConsulInstanceTreeItem } from "../providers/consulProvider";
 import { ConsulTreeDataProvider } from "../providers/treeDataProvider";
 import vscode from 'vscode';
 import Consul from "consul";
@@ -206,26 +206,19 @@ export const build = (context: vscode.ExtensionContext, provider: ConsulTreeData
             }
         );
 
-        // 保存到映射中
         configPanels.set(node.label, panel);
 
-        // 当面板关闭时从映射中移除
         panel.onDidDispose(() => {
             configPanels.delete(node.label);
         });
-
-        // 获取 webview 工具包的本地路径
         const toolkitUri = panel.webview.asWebviewUri(
             vscode.Uri.joinPath(context.extensionUri, 'media', 'webview', 'toolkit.bundle.js')
         );
 
-        // 获取当前配置
         const currentConfig = node.provider.getConfig() || {};
 
-        // 设置 webview 内容
         panel.webview.html = getConfigWebviewContent(node.label, currentConfig, toolkitUri);
 
-        // 处理来自 webview 的消息
         panel.webview.onDidReceiveMessage(async message => {
             switch (message.command) {
                 case 'save':

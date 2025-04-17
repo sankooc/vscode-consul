@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 // import type vscode from 'vscode';
 import Consul from 'consul';
 import type { ConsulOptions } from 'consul/lib/consul';
+import { RegisterOptions } from 'consul/lib/agent/service';
+import { ConsulNode, ConsulService } from '../common';
 
 export class ConsulProvider {
     private _consul: Consul | undefined;
@@ -24,37 +26,34 @@ export class ConsulProvider {
         this.cfg = opt;
     }
     public getConfig(): ConsulOptions | null {
-        if(!this.cfg){
+        if (!this.cfg) {
             return null;
         }
         return JSON.parse(JSON.stringify(this.cfg));
     }
-    public getURLString(){
-        if(!this._isConnected){
+    public getURLString() {
+        if (!this._isConnected) {
             return 'disconnected';
         }
-        if(this.cfg){
+        if (this.cfg) {
             return `${this.cfg.host}:${this.cfg.port}`;
         }
         return 'unkown';
     }
 
     public async connect(): Promise<void> {
-        if(!this.cfg){
+        if (!this.cfg) {
             throw new Error('no consul config');
         }
         try {
             this._consul = new Consul(this.cfg);
             const sf = await this._consul.agent.self();
-            if(sf?.Config?.NodeName){ //todo ??
+            if (sf?.Config?.NodeName) { //todo ??
                 this._instance = sf.Config;
                 this._isConnected = true;
             } else {
                 vscode.window.showErrorMessage('connect failed');
             }
-            // const member = await this._consul.agent.members();
-            // console.log(member);
-            // this._isConnected = true;
         } catch (error) {
             this._isConnected = false;
             throw error;
@@ -64,17 +63,6 @@ export class ConsulProvider {
     public async disconnect(): Promise<void> {
         this._consul = undefined;
         this._isConnected = false;
-    }
-
-
-    public async services(): Promise<any[]> {
-        if(this._instance){
-            const { NodeName } = this._instance;
-            const { Services } = await this._consul?.catalog.node.services(NodeName);
-            console.log(Services);
-            return Object.values(Services);
-        }
-        return [];
     }
 
     public refresh(): void {
@@ -152,24 +140,48 @@ export class ConsulProvider {
         });
     }
 
-    public async getServices(): Promise<CatalogTreeItem[]> {
+    public async getNodes(): Promise<ConsulNode[]> {
         if (!this._consul) {
             return [];
         }
 
         try {
-            const services = await this._consul.catalog.service.list() as Record<string, string[]>;
-            return Object.entries(services).map(([name, tags]) => {
-                return new CatalogTreeItem(
-                    name,
-                    'service',
-                    vscode.TreeItemCollapsibleState.None,
-                    this
-                );
-            });
+            return this._consul.catalog.node.list();
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to get services: ${error}`);
             return [];
+        }
+    }
+
+    public async getServices(node: string): Promise<ConsulService[]> {
+        if (!this._consul) {
+            return [];
+        }
+
+        try {
+            const rs = await this._consul.catalog.node.services(node);
+            if (rs) {
+                return Object.values(rs.Services);
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to get services: ${error}`);
+        }
+        return [];
+    }
+
+    public async registerService(opt: RegisterOptions): Promise<void> {
+        if (!this._consul) {
+            throw new Error('Consul client not initialized');
+        }
+        try {
+            const result = await this._consul.agent.service.register(opt);
+            if (result) {
+                this._onDidChangeServiceTreeData.fire();
+            }
+            return result;
+        } catch (error) {
+            vscode.window.showErrorMessage('Failed to register');
+            throw error;
         }
     }
 
@@ -182,7 +194,7 @@ export class ConsulProvider {
         this.refresh();
     }
 
-    public async addKV(key: string): Promise<void>{
+    public async addKV(key: string): Promise<void> {
         if (!this._consul) {
             throw new Error('Not connected to Consul');
         }
@@ -232,9 +244,26 @@ export class ConsulProvider {
         }
     }
 
+    public async register(opt: RegisterOptions): Promise<void> {
+        if (!this._consul) {
+            throw new Error('Consul client not initialized');
+        }
+        try {
+            const result = await this._consul.catalog.register(opt as any);
+            if (result) {
+                this._onDidChangeKVTreeData.fire();
+            }
+            // return result;
+        } catch (error) {
+            vscode.window.showErrorMessage('Failed to register');
+            throw error;
+        }
+
+    }
+
     public createTreeItem(collapsibleState: vscode.TreeItemCollapsibleState): ConsulInstanceTreeItem {
         return new ConsulInstanceTreeItem(
-            this.label, 
+            this.label,
             this,
             collapsibleState
         );
@@ -274,7 +303,7 @@ export class KVTreeItem extends vscode.TreeItem {
             this.iconPath = new vscode.ThemeIcon('folder');
         }
     }
-    buildURI(): vscode.Uri{
+    buildURI(): vscode.Uri {
         const scheme = 'consul-kv';
         return vscode.Uri.parse(`${scheme}:/${this.key}`).with({ scheme });
     }
@@ -290,6 +319,7 @@ export class CatalogTreeItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
         public readonly type: string,
+        public readonly node: string,
         // public readonly tags: string[],
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
         public readonly provider: ConsulProvider | undefined,
@@ -298,16 +328,52 @@ export class CatalogTreeItem extends vscode.TreeItem {
         // this.tooltip = `${label} [${tags.join(', ')}]`;
         // this.description = tags.join(', ');
         this.contextValue = 'service';
-        switch(this.type){
+        switch (this.type) {
             case 'root':
                 this.iconPath = new vscode.ThemeIcon('project');
+                break;
+            case 'node':
+                this.iconPath = new vscode.ThemeIcon('device-desktop');
                 break;
             default:
                 this.iconPath = new vscode.ThemeIcon('symbol-function');
         }
     }
+    public async getChildren(): Promise<CatalogTreeItem[]> {
+        const provider = this.provider;
+        if (!provider || !provider.isConnected) {
+            return [];
+        }
+        switch (this.type) {
+            case 'root':
+                const list = await provider.getNodes();
+                return list.map(node => {
+                    return new CatalogTreeItem(
+                        node.Address,
+                        'node',
+                        node.ID,
+                        vscode.TreeItemCollapsibleState.Collapsed,
+                        provider
+                    );
+                });
+            case 'node':
+                const ss = await provider.getServices(this.node);
+                return ss.map(node => {
+                    return new CatalogTreeItem(
+                        node.Service,
+                        'service',
+                        this.node,
+                        vscode.TreeItemCollapsibleState.None,
+                        provider
+                    );
+                });
+
+            default:
+                return [];
+        }
+    }
     static rootItem(provider: ConsulProvider | undefined): CatalogTreeItem {
-        return new CatalogTreeItem('Catalog', 'root', vscode.TreeItemCollapsibleState.Collapsed, provider);
+        return new CatalogTreeItem('Catalog', 'root', '', vscode.TreeItemCollapsibleState.Collapsed, provider);
     }
 }
 

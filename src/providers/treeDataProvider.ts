@@ -67,10 +67,8 @@ export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulIns
             return element.children || [];
         }
         if (element instanceof CatalogTreeItem) {
-            const provider = element.provider;
-            return provider && provider.isConnected ? provider.getServices() : [];
+            return element.getChildren();
         }
-
         return [];
     }
 
