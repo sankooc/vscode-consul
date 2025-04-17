@@ -2,7 +2,7 @@
   "name": "vscode-consul",
   "displayName": "VSCode for Consul",
   "description": "Consul integration for VS Code",
-  "version": "0.0.1",
+  "version": "0.0.1-preview",
   "engines": {
 		"vscode": "^1.86.2"
   },
@@ -99,6 +99,16 @@
         "command": "consul.service.view",
         "icon": "$(bracket)",
         "title": "detail"
+      },
+      {
+        "command": "consul.exportAllKV",
+        "title": "Export All KV",
+        "icon": "$(clone)"
+      },
+      {
+        "command": "consul.importAllKV",
+        "title": "Import All KV",
+        "icon": "$(replace)"
       }
     ],
     "menus": {
@@ -164,6 +174,16 @@
           "command": "consul.service.view",
           "when": "viewItem == catalogItemWithDetails",
           "group": "inline"
+        },
+        {
+          "command": "consul.exportAllKV",
+          "when": "viewItem == kvRoot",
+          "group": "navigation"
+        },
+        {
+          "command": "consul.importAllKV",
+          "when": "viewItem == kvRoot",
+          "group": "navigation"
         }
       ]
     }
@@ -189,7 +209,7 @@
 	},
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.4.0",
-    "consul": "file:../node-consul"
+    "consul": "github:sankooc/node-consul#2.0.1-snap"
   },
   "devDependencies": {
     "@types/consul": "^0.40.3",

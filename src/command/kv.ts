@@ -1,3 +1,4 @@
+import { KVItem, unzipData, zipData } from "../common";
 import { ConsulProvider, KVTreeItem } from "../providers/consulProvider";
 import { ConsulTreeDataProvider } from "../providers/treeDataProvider";
 import vscode from 'vscode';
@@ -133,6 +134,44 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
         }
     });
 
+
+    const exportData = vscode.commands.registerCommand('consul.exportAllKV', async (node: KVTreeItem) => {
+        const saveUri = await vscode.window.showSaveDialog({
+            filters: { 'JSON Files': ['json'] }
+        });
+        if (!saveUri) {
+            return;
+        }
+        const items = await node.provider?.loadAllKV();
+        // consulTreeProvider.persistInstances();
+        // consulTreeProvider.refresh();
+        if (items) {
+            await vscode.workspace.fs.writeFile(saveUri, zipData(items));
+            vscode.window.showInformationMessage('KV data exported successfully!');
+        }
+    });
+    
+    const importData = vscode.commands.registerCommand('consul.importAllKV', async (node: KVTreeItem) => {
+        const openUris = await vscode.window.showOpenDialog({
+            filters: { 'JSON Files': ['json'] },
+            canSelectMany: false
+        });
+        if (!openUris || openUris.length === 0) {
+            return;
+        }
+        const fileUri = openUris[0];
+        const fileData = await vscode.workspace.fs.readFile(fileUri);
+        const items: KVItem[] = unzipData(fileData);
+        if(!items || !items.length){
+            vscode.window.showErrorMessage('archive format is invalid');
+        } else {
+            await node.provider?.saveKVs(items);
+            consulTreeProvider.persistInstances();
+            consulTreeProvider.refresh();
+            vscode.window.showInformationMessage('KV data imported successfully!');
+        }
+    });
+
     const openKVEditorCommand = vscode.commands.registerCommand('consul.openKVEditor', async (node: KVTreeItem) => {
         if (!node.provider || !node.key) {
             return;
@@ -159,5 +198,5 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
         }
     });
 
-    return [addKVCommand, refreshKVCommand, deleteKVCommand, openKVEditorCommand];
+    return [addKVCommand, refreshKVCommand, deleteKVCommand, openKVEditorCommand, exportData, importData];
 };

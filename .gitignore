@@ -4,3 +4,4 @@ node_modules
 .vscode-test/
 *.vsix
 sandbox
+media/**/*.bundle.js

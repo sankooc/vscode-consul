@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import Consul from 'consul';
 import type { ConsulOptions } from 'consul/lib/consul';
 import { RegisterOptions } from 'consul/lib/agent/service';
-import { ConsulNode, ConsulService } from '../common';
+import { ConsulNode, ConsulService, KVItem } from '../common';
 
 export class ConsulProvider {
     private _consul: Consul | undefined;
@@ -70,6 +70,40 @@ export class ConsulProvider {
         this._onDidChangeServiceTreeData.fire();
     }
 
+    public async loadAllKV(): Promise<KVItem[]> {
+        if (!this._consul) {
+            return [];
+        }
+
+        try {
+            const result = await this._consul.kv.keys('');
+            if (!result) {
+                return [];
+            }
+            const keys = Array.isArray(result) ? result : [result];
+            const rs: KVItem[] = [];
+            for (const key of keys) {
+                const value = await this.getKVValue(key);
+                if(value){
+                    rs.push({ key, value });
+                }
+            }
+            return rs;
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to get KV pairs: ${error}`);
+            return [];
+        }
+    }
+    public async saveKVs(items: KVItem[]){
+        if (!this._consul) {
+            throw new Error('Not connected to Consul');
+        }
+        for(const item of items){
+            const { key, value } = item;
+            await this._consul.kv.set(key, value);
+        }
+        this.refresh();
+    }
     public async getKVTree(): Promise<KVTreeItem[]> {
         if (!this._consul) {
             return [];
@@ -82,7 +116,6 @@ export class ConsulProvider {
             }
 
             const items = Array.isArray(result) ? result : [result];
-            const label = this.label;
             return await ConsulProvider.buildKVTree(this, items);
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to get KV pairs: ${error}`);

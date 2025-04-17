@@ -52,3 +52,30 @@ export interface ConsulService {
     CreateIndex?: number;
     ModifyIndex?: number;
 }
+
+
+
+export interface KVItem {
+    key: string;
+    value: string;
+}
+
+// const loader = {
+//     "1.0": {
+//         zip: (items: KVItem[]) => ({ meta: 'kv', version: '1.0', items}),
+//     }
+// }
+export const zipData = function(items: KVItem[]): Buffer {
+    const jsonData = JSON.stringify({ meta: 'kv', version: '1.0', items});
+    return Buffer.from(jsonData, 'utf8');
+};
+
+export const unzipData = function(buf: Uint8Array): KVItem[] {
+    const rs = JSON.parse(buf.toString());
+    const { meta, version } = rs;
+    if(meta !== 'kv'){
+        return [];
+    }
+    const items: KVItem[] = rs.items;
+    return items;
+};
