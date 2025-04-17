@@ -75,7 +75,6 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
             }
         }
 
-        // 添加新方法来设置初始内容
         async setInitialContent(key: string, content: string, provider: ConsulProvider): Promise<void> {
             this._contents.set(key, new TextEncoder().encode(content));
             this._providers.set(key, provider);

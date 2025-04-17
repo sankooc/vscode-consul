@@ -316,10 +316,12 @@ export class KVTreeItem extends vscode.TreeItem {
 }
 
 export class CatalogTreeItem extends vscode.TreeItem {
+    private static readonly contentMap: Map<string, any> = new Map();
     constructor(
         public readonly label: string,
         public readonly type: string,
         public readonly node: string,
+        public readonly content: any,
         // public readonly tags: string[],
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
         public readonly provider: ConsulProvider | undefined,
@@ -327,7 +329,10 @@ export class CatalogTreeItem extends vscode.TreeItem {
         super(label, collapsibleState);
         // this.tooltip = `${label} [${tags.join(', ')}]`;
         // this.description = tags.join(', ');
-        this.contextValue = 'service';
+        
+        if (this.type !== 'root') {
+            this.contextValue = 'catalogItemWithDetails';
+        }
         switch (this.type) {
             case 'root':
                 this.iconPath = new vscode.ThemeIcon('project');
@@ -337,21 +342,39 @@ export class CatalogTreeItem extends vscode.TreeItem {
                 break;
             default:
                 this.iconPath = new vscode.ThemeIcon('symbol-function');
+                // this.command = {
+                //     command: 'consul.service.view',
+                //     title: 'open service',
+                //     arguments: [this]
+                // };
+                break;
         }
+        // if (this.type !== 'root') {
+        //     this.command = {
+        //         command: 'consul.service.view',
+        //         title: '查看详情',
+        //         arguments: [this]
+        //     };
+        // }
     }
+
+
     public async getChildren(): Promise<CatalogTreeItem[]> {
         const provider = this.provider;
         if (!provider || !provider.isConnected) {
             return [];
         }
+        // const scheme = CatalogTreeItem.schema;
         switch (this.type) {
             case 'root':
                 const list = await provider.getNodes();
                 return list.map(node => {
+                    // const url = vscode.Uri.parse(`${scheme}:/node/${this.node}`).with({ scheme });
                     return new CatalogTreeItem(
                         node.Address,
                         'node',
                         node.ID,
+                        node,
                         vscode.TreeItemCollapsibleState.Collapsed,
                         provider
                     );
@@ -363,6 +386,7 @@ export class CatalogTreeItem extends vscode.TreeItem {
                         node.Service,
                         'service',
                         this.node,
+                        node,
                         vscode.TreeItemCollapsibleState.None,
                         provider
                     );
@@ -373,8 +397,14 @@ export class CatalogTreeItem extends vscode.TreeItem {
         }
     }
     static rootItem(provider: ConsulProvider | undefined): CatalogTreeItem {
-        return new CatalogTreeItem('Catalog', 'root', '', vscode.TreeItemCollapsibleState.Collapsed, provider);
+        return new CatalogTreeItem('Catalog', 'root', '', '', vscode.TreeItemCollapsibleState.Collapsed, provider);
     }
+    public static readonly schema = 'consul-catalog';
+    buildURI(): vscode.Uri {
+        const scheme = CatalogTreeItem.schema;
+        return vscode.Uri.parse(`${scheme}:/raw?data=${JSON.stringify(this.content)}`).with({ scheme });
+    }
+    
 }
 
 export class ConsulInstanceTreeItem extends vscode.TreeItem {

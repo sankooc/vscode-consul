@@ -1,6 +1,6 @@
 {
-  "name": "vs-consul",
-  "displayName": "VS Code Consul",
+  "name": "vscode-consul",
+  "displayName": "VSCode for Consul",
   "description": "Consul integration for VS Code",
   "version": "0.0.1",
   "engines": {
@@ -9,6 +9,11 @@
   "categories": [
     "Other"
   ],
+	"icon": "resources/icon128.png",
+	"keywords": [
+		"Consul",
+		"Service Discovery"
+	],
   "publisher": "sankooc",
   "activationEvents": [],
   "main": "./dist/extension.js",
@@ -85,6 +90,11 @@
         "command": "consul.deleteKVPair",
         "title": "Delete KV Pair",
         "icon": "$(trash)"
+      },
+      {
+        "command": "consul.service.view",
+        "icon": "$(bracket)",
+        "title": "detail"
       }
     ],
     "menus": {
@@ -144,6 +154,11 @@
         {
           "command": "consul.deleteKVPair",
           "when": "viewItem == kvLeaf",
+          "group": "inline"
+        },
+        {
+          "command": "consul.service.view",
+          "when": "viewItem == catalogItemWithDetails",
           "group": "inline"
         }
       ]
