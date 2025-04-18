@@ -372,23 +372,13 @@ export class CatalogTreeItem extends vscode.TreeItem {
                 break;
             case 'node':
                 this.iconPath = new vscode.ThemeIcon('device-desktop');
+                this.description = this.content?.Node;
+                this.tooltip = this.content?.Meta?.['consul-version'];
                 break;
             default:
                 this.iconPath = new vscode.ThemeIcon('symbol-function');
-                // this.command = {
-                //     command: 'consul.service.view',
-                //     title: 'open service',
-                //     arguments: [this]
-                // };
                 break;
         }
-        // if (this.type !== 'root') {
-        //     this.command = {
-        //         command: 'consul.service.view',
-        //         title: '查看详情',
-        //         arguments: [this]
-        //     };
-        // }
     }
 
 

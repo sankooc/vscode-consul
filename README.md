@@ -1,6 +1,23 @@
 # VSCode for Consul
 
 
+<p align="center">
+  <a href="/">
+    <img src="https://img.shields.io/github/license/sankooc/vscode-consul" alt="License">
+  </a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=sankooc.vscode-consul">
+    <img src="https://img.shields.io/visual-studio-marketplace/i/sankooc.vscode-consul" alt="Install Count">
+  </a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=sankooc.vscode-consul">
+    <img src="https://img.shields.io/visual-studio-marketplace/d/sankooc.vscode-consul" alt="Download Count">
+  </a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=sankooc.vscode-consul">
+    <img src="https://img.shields.io/visual-studio-marketplace/last-updated/sankooc.vscode-consul" alt="Last Updated">
+  </a>
+  <a href="/">
+    <img src="https://img.shields.io/visual-studio-marketplace/stars/sankooc.vscode-consul" alt="Marketplace Stars">
+  </a>
+</p>
 
 **VSCode for Consul** is a Visual Studio Code extension that integrates HashiCorp Consul functionalities directly into your IDE, enabling seamless service discovery and configuration management.
 

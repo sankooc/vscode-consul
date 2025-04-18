@@ -1,15 +1,22 @@
 services:
   consul:
     image: hashicorp/consul:1.20
+    hostname: "consul-master"
     command: agent -server -bootstrap-expect=1 -ui -client=0.0.0.0 -config-dir=/consul/config
     volumes:
       # - ./data/consul:/consul/data
       - ./consul.json:/consul/config/consul.json
     ports:
       - "8500:8500"
-    restart: always
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "20m"
-        max-file: "2"
+  consul2:
+    image: hashicorp/consul:1.20
+    hostname: "consul2"
+    command: "agent -server -join consul -disable-host-node-id"
+    depends_on: 
+      - consul
+  consul3:
+    image: hashicorp/consul:1.20
+    hostname: "consul3"
+    command: "agent -server -join consul -disable-host-node-id"
+    depends_on: 
+      - consul
