@@ -1,5 +1,5 @@
 import { ConsulOptions } from "consul/lib/consul";
-import { ConsulInstanceTreeItem } from "../providers/consulProvider";
+import ConsulInstanceTreeItem from "./treeitem";
 import { ConsulTreeDataProvider } from "../providers/treeDataProvider";
 import vscode from 'vscode';
 import Consul from "consul";
@@ -134,7 +134,7 @@ function getConfigWebviewContent(label: string, config: any, toolkitUri: vscode.
     `;
 }
 
-export const build = (context: vscode.ExtensionContext, provider: ConsulTreeDataProvider): vscode.Disposable[] => {
+export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvider): vscode.Disposable[] => {
 
     const addInstanceCommand = vscode.commands.registerCommand('consul.addInstance', async () => {
         const name = await vscode.window.showInputBox({

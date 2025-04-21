@@ -209,7 +209,7 @@
 	},
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.4.0",
-    "consul": "github:sankooc/node-consul#2.0.1-snap"
+    "consul": "file:../node-consul"
   },
   "devDependencies": {
     "@types/consul": "^0.40.3",

@@ -1,4 +1,6 @@
 // import { ConsulProvider, KVTreeItem } from "./providers/consulProvider";
+import vscode from 'vscode';
+import { ConsulTreeItem } from './providers/treeDataProvider';
 
 export const log = function(...args: any){
     console.log(...args);
@@ -79,3 +81,13 @@ export const unzipData = function(buf: Uint8Array): KVItem[] {
     const items: KVItem[] = rs.items;
     return items;
 };
+
+
+export class BasicTreeItem extends vscode.TreeItem {
+    constructor(label: string, collapsibleState: vscode.TreeItemCollapsibleState){
+        super(label, collapsibleState);
+    }
+    async getChildren(): Promise<ConsulTreeItem[]> {
+        return [];
+    }
+} 

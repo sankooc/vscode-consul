@@ -12,8 +12,8 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0(react@19.1.0)
       consul:
-        specifier: github:sankooc/node-consul#2.0.1-snap
-        version: https://codeload.github.com/sankooc/node-consul/tar.gz/79365559996772fa0dae146f17e7517fcde9c941
+        specifier: file:../node-consul
+        version: file:../node-consul
     devDependencies:
       '@types/consul':
         specifier: ^0.40.3
@@ -525,9 +525,8 @@ packages:
   concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
 
-  consul@https://codeload.github.com/sankooc/node-consul/tar.gz/79365559996772fa0dae146f17e7517fcde9c941:
-    resolution: {tarball: https://codeload.github.com/sankooc/node-consul/tar.gz/79365559996772fa0dae146f17e7517fcde9c941}
-    version: 2.0.1
+  consul@file:../node-consul:
+    resolution: {directory: ../node-consul, type: directory}
 
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
@@ -2127,7 +2126,7 @@ snapshots:
 
   concat-map@0.0.1: {}
 
-  consul@https://codeload.github.com/sankooc/node-consul/tar.gz/79365559996772fa0dae146f17e7517fcde9c941:
+  consul@file:../node-consul:
     dependencies:
       papi: 1.1.2
       uuid: 10.0.0

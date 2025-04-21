@@ -1,9 +1,9 @@
-import { CatalogTreeItem } from "../providers/consulProvider";
+import CatalogTreeItem from "./treeitem";
 import { ConsulTreeDataProvider } from "../providers/treeDataProvider";
 import vscode from 'vscode';
 
 
-export const build = (context: vscode.ExtensionContext, consulTreeProvider: ConsulTreeDataProvider): vscode.Disposable[] => {
+export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTreeDataProvider): vscode.Disposable[] => {
 
     vscode.workspace.registerTextDocumentContentProvider(CatalogTreeItem.schema, {
         async provideTextDocumentContent(uri: vscode.Uri, _: vscode.CancellationToken): Promise<string> {
