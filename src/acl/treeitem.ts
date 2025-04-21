@@ -25,8 +25,8 @@ class CTreeItem extends BasicTreeItem {
     }
     public async getChildren(): Promise<ConsulTreeItem[]> {
         return [
-            new PolicyTreeItem('Policy', 'policy', vscode.TreeItemCollapsibleState.Collapsed, 'policy_root', this.provider),
-            new TokenTreeItem('Token', 'token', vscode.TreeItemCollapsibleState.Collapsed, 'token_root', this.provider),
+            new PolicyTreeItem('Policy', 'policy', vscode.TreeItemCollapsibleState.Collapsed, PolicyTreeItem.ROOT, this.provider),
+            new TokenTreeItem('Token', 'token', vscode.TreeItemCollapsibleState.Collapsed, TokenTreeItem.ROOT, this.provider),
             new RoleTreeItem('Role', 'role', vscode.TreeItemCollapsibleState.Collapsed, 'role_root', this.provider),
             new TemplatedPolicyTreeItem('Templated Policy', 'templatedPolicy', vscode.TreeItemCollapsibleState.Collapsed, 'tp_root', this.provider),
             new MethodTreeItem('Auth Method', 'method', vscode.TreeItemCollapsibleState.Collapsed, 'method_root', this.provider),

@@ -7,6 +7,7 @@ import { PolicyResult } from 'consul/lib/acl/policy';
 
 class CTreeItem extends BasicTreeItem {
     // public policyId?: string;
+    public static ROOT = 'policy_root';
     public static readonly scheme = 'consul-policy';
     constructor(
         public readonly label: string,
@@ -18,7 +19,7 @@ class CTreeItem extends BasicTreeItem {
         super(label, collapsibleState);
         this.description = '';
         switch (this.contextValue) {
-            case 'policy_root':
+            case CTreeItem.ROOT:
                 this.iconPath = new vscode.ThemeIcon('filter');
                 break;
             default:
@@ -32,7 +33,7 @@ class CTreeItem extends BasicTreeItem {
     }
     async getChildren(): Promise<ConsulTreeItem[]> {
         switch (this.contextValue) {
-            case 'policy_root':
+            case CTreeItem.ROOT:
                 return ((await this.provider?.list_policy()) || []).map((item: PolicyResult) => {
                     const ct = new CTreeItem(
                         item.Name,
