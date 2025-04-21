@@ -1,6 +1,7 @@
 // import { ConsulProvider, KVTreeItem } from "./providers/consulProvider";
 import vscode from 'vscode';
-import { ConsulTreeItem } from './providers/treeDataProvider';
+import { ConsulTreeDataProvider, ConsulTreeItem } from './providers/treeDataProvider';
+import ConsulProvider from './providers/consulProvider';
 
 export const log = function(...args: any){
     console.log(...args);
@@ -90,4 +91,92 @@ export class BasicTreeItem extends vscode.TreeItem {
     async getChildren(): Promise<ConsulTreeItem[]> {
         return [];
     }
-} 
+}
+
+
+
+export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
+    private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+    private content_map = new Map<string, T>();
+
+    readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
+
+    constructor(private cProvider: ConsulTreeDataProvider) { }
+
+    watch(uri: vscode.Uri): vscode.Disposable {
+        return new vscode.Disposable(() => { });
+    }
+
+    async _read(provider: ConsulProvider, id: string): Promise<[string, T]> {
+        throw new Error('Method not implemented.');
+    }
+    async content(uri: vscode.Uri): Promise<string>{
+        const _path = uri.path;
+        const [_, label, key] = _path.split('/');
+        const provider = this.cProvider.getActiveProvider(label);
+        if(provider) {
+            const [_text, cache] = await this._read(provider, key);
+            this.content_map.set(_path, cache);
+            return _text;
+        }
+        throw new Error('no active provider');
+    }
+    stat(uri: vscode.Uri): vscode.FileStat {
+        const _path = uri.path;
+        const stat = this.content_map.get(_path);
+        const def =  {
+            type: vscode.FileType.File,
+            ctime: Date.now(),
+            mtime: Date.now(),
+            size: 0,
+        };
+        if(stat) {
+            return {...def, ...stat};
+        }
+        return def;
+    }
+
+    readDirectory(uri: vscode.Uri): [string, vscode.FileType][] {
+        return [];
+    }
+
+    createDirectory(uri: vscode.Uri): void { }
+
+    async readFile(uri: vscode.Uri): Promise<Uint8Array> {
+        const _content = await this.content(uri);
+        if(_content){
+            return new TextEncoder().encode(_content);
+        }
+        throw vscode.FileSystemError.FileNotFound(uri);
+    }
+
+    async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
+        const _path = uri.path;
+        const cache = this.content_map.get(_path);
+        const [_, label, id] = _path.split('/');
+        const provider = this.cProvider.getActiveProvider(label);
+        if(provider && cache) {
+            const value = new TextDecoder().decode(content);
+            await this._update(provider, id, value, cache);
+        }
+    }
+
+    async _update(provider: ConsulProvider, id: string, value: string, cache: T ): Promise<boolean> {
+        return false;
+    }
+
+    delete(uri: vscode.Uri): void {
+        const _path = uri.path;
+        const [_, label, id] = _path.split('/');
+        const provider = this.cProvider.getActiveProvider(label);
+        if(provider) {
+            this._delete(provider, id);
+        }
+    }
+
+    async _delete(provider: ConsulProvider, id: string): Promise<boolean> {
+        return false;
+    }
+    rename(oldUri: vscode.Uri, newUri: vscode.Uri): void {
+    }
+}

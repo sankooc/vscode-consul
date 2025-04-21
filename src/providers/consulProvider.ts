@@ -8,6 +8,7 @@ import ConsulInstanceTreeItem from '../instance/treeitem';
 import KVTreeItem from '../kv/treeitem';
 import CatalogTreeItem  from '../catelog/treeitem';
 import { PolicyCreateOption, PolicyResult } from 'consul/lib/acl/policy';
+import { TokenResult } from 'consul/lib/acl/token';
 
 export default class ConsulProvider {
     private _consul: Consul | undefined;
@@ -24,6 +25,10 @@ export default class ConsulProvider {
 
     public get isConnected(): boolean {
         return this._isConnected;
+    }
+
+    public getLabel(): string {
+        return this.label;
     }
 
     public setConfig(opt: ConsulOptions): void {
@@ -315,6 +320,30 @@ export default class ConsulProvider {
         this.check();
         this._consul!.acl.policy.delete(id);
     }
+
+    public async read_policy(id: string): Promise<PolicyResult> {
+        this.check();
+        return this._consul!.acl.policy.read(id);
+    }
+
+    public async update_policy(id: string, opt: PolicyCreateOption): Promise<PolicyResult> {
+        this.check();
+        return this._consul!.acl.policy.update(id, opt);
+    }
+
+    public async list_token(): Promise<TokenResult[]> {
+        this.check();
+        return this._consul!.acl.token.list();
+    }
+    // public async add_token(opt: PolicyCreateOption): Promise<void> {
+    //     this.check();
+    //     this._consul!.acl.token.create(opt);
+    // }
+    // public async del_token(id: string): Promise<void> {
+    //     this.check();
+    //     this._consul!.acl.token.delete(id);
+    // }
+    
 
     public createTreeItem(collapsibleState: vscode.TreeItemCollapsibleState): ConsulInstanceTreeItem {
         return new ConsulInstanceTreeItem(

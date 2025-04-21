@@ -109,6 +109,16 @@
         "command": "consul.importAllKV",
         "title": "Import All KV",
         "icon": "$(replace)"
+      },
+      {
+        "command": "consul.acl.policy.add",
+        "title": "Add Consul Policy",
+        "icon": "$(add)"
+      },
+      {
+        "command": "consul.acl.policy.del",
+        "title": "Remove Consul Policy",
+        "icon": "$(trash)"
       }
     ],
     "menus": {
@@ -184,6 +194,16 @@
           "command": "consul.importAllKV",
           "when": "viewItem == kvRoot",
           "group": "navigation"
+        },
+        {
+          "command": "consul.acl.policy.add",
+          "when": "viewItem == policy_root",
+          "group": "inline"
+        },
+        {
+          "command": "consul.acl.policy.del",
+          "when": "viewItem == policy_leaf",
+          "group": "inline"
         }
       ]
     }

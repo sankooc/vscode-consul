@@ -6,7 +6,8 @@ import { PolicyResult } from 'consul/lib/acl/policy';
 
 
 class CTreeItem extends BasicTreeItem {
-    public policyId?: string;
+    // public policyId?: string;
+    public static readonly scheme = 'consul-policy';
     constructor(
         public readonly label: string,
         public readonly key: string,
@@ -16,25 +17,40 @@ class CTreeItem extends BasicTreeItem {
     ) {
         super(label, collapsibleState);
         this.description = '';
-    }
-    static rootItem(provider: ConsulProvider | undefined): CTreeItem {
-        return new CTreeItem('Policy', '', vscode.TreeItemCollapsibleState.Collapsed, 'root', provider);
+        switch (this.contextValue) {
+            case 'policy_root':
+                this.iconPath = new vscode.ThemeIcon('filter');
+                break;
+            default:
+                this.iconPath = new vscode.ThemeIcon('code');
+                this.command = {
+                    command: 'consul.acl.policy.edit',
+                    title: 'Edit',
+                    arguments: [this]
+                };
+        }
     }
     async getChildren(): Promise<ConsulTreeItem[]> {
         switch (this.contextValue) {
-            case 'root':
+            case 'policy_root':
                 return ((await this.provider?.list_policy()) || []).map((item: PolicyResult) => {
-                    return new CTreeItem(
+                    const ct =  new CTreeItem(
                         item.Name,
                         item.ID!,
                         vscode.TreeItemCollapsibleState.None,
-                        'leaf',
+                        'policy_leaf',
                         this.provider
                     );
+                    ct.description = item.Description;
+                    return ct;
                 });
             default:
                 return [];
         }
+    }
+    buildURI(): vscode.Uri {
+        const url = `${this.provider?.getLabel()}/${this.key}`;
+        return vscode.Uri.parse(`${CTreeItem.scheme}:/${url}`).with({ scheme: CTreeItem.scheme });
     }
 }
 

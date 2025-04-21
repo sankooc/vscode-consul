@@ -46,6 +46,18 @@ export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulTre
         await this.context.globalState.update('consulInstances', instances);
     }
 
+    public getProvider(label: string): ConsulProvider | undefined {
+        return this.consulInstances.get(label);
+    }
+
+    public getActiveProvider(label: string): ConsulProvider {
+        const provider = this.consulInstances.get(label);
+        if (!provider) {
+            throw new Error(`Consul instance ${label} not found`);
+        }
+        return provider;
+    }
+
     getTreeItem(element: ConsulTreeItem): vscode.TreeItem {
         return element;
     }

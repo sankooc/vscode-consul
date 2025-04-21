@@ -28,9 +28,9 @@ export default class CTreeItem extends BasicTreeItem {
             return [];
         }
         return [
+            ACLTreeItem.rootItem(this.provider),
             KVTreeItem.rootItem(this.provider),
             CatalogTreeItem.rootItem(this.provider),
-            ACLTreeItem.rootItem(this.provider),
-        ]
+        ];
     }
 }
