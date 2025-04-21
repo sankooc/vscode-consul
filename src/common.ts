@@ -101,7 +101,7 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
 
     readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
 
-    constructor(private cProvider: ConsulTreeDataProvider) { }
+    constructor(protected cProvider: ConsulTreeDataProvider) { }
 
     watch(uri: vscode.Uri): vscode.Disposable {
         return new vscode.Disposable(() => { });
@@ -119,7 +119,7 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
             this.content_map.set(_path, cache);
             return _text;
         }
-        throw new Error('no active provider');
+        throw vscode.FileSystemError.FileNotFound(uri);
     }
     stat(uri: vscode.Uri): vscode.FileStat {
         const _path = uri.path;
@@ -144,10 +144,7 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
 
     async readFile(uri: vscode.Uri): Promise<Uint8Array> {
         const _content = await this.content(uri);
-        if(_content){
-            return new TextEncoder().encode(_content);
-        }
-        throw vscode.FileSystemError.FileNotFound(uri);
+        return new TextEncoder().encode(_content);
     }
 
     async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
@@ -170,13 +167,24 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
         const [_, label, id] = _path.split('/');
         const provider = this.cProvider.getActiveProvider(label);
         if(provider) {
-            this._delete(provider, id);
+            this._delete(provider, id).then((result) => {
+                if(result) {
+                    this.content_map.delete(_path);
+                    this._emitter.fire([{
+                        type: vscode.FileChangeType.Deleted,
+                        uri: uri
+                    }]);
+                }
+            }).catch((error) => {
+                vscode.window.showErrorMessage(`Failed to delete: ${error}`);
+            });
         }
     }
 
     async _delete(provider: ConsulProvider, id: string): Promise<boolean> {
         return false;
     }
+
     rename(oldUri: vscode.Uri, newUri: vscode.Uri): void {
     }
 }

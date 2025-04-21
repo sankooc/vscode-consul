@@ -34,11 +34,11 @@ class CTreeItem extends BasicTreeItem {
         switch (this.contextValue) {
             case 'policy_root':
                 return ((await this.provider?.list_policy()) || []).map((item: PolicyResult) => {
-                    const ct =  new CTreeItem(
+                    const ct = new CTreeItem(
                         item.Name,
                         item.ID!,
                         vscode.TreeItemCollapsibleState.None,
-                        'policy_leaf',
+                        CTreeItem.isBuildinId(item.ID!) ? 'policy_build_leaf' :'policy_leaf',
                         this.provider
                     );
                     ct.description = item.Description;
@@ -51,6 +51,12 @@ class CTreeItem extends BasicTreeItem {
     buildURI(): vscode.Uri {
         const url = `${this.provider?.getLabel()}/${this.key}`;
         return vscode.Uri.parse(`${CTreeItem.scheme}:/${url}`).with({ scheme: CTreeItem.scheme });
+    }
+    public static isBuildinId(id: string): boolean {
+        if (id === '00000000-0000-0000-0000-000000000001' || id === '00000000-0000-0000-0000-000000000002') {
+            return true;
+        }
+        return false;
     }
 }
 
