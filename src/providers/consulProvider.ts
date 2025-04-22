@@ -9,6 +9,8 @@ import KVTreeItem from '../kv/treeitem';
 import CatalogTreeItem  from '../catelog/treeitem';
 import { PolicyCreateOption, PolicyResult } from 'consul/lib/acl/policy';
 import { TokenResult } from 'consul/lib/acl/token';
+import { Role } from 'consul/lib/acl/role';
+import { TemplatedPolicy } from 'consul/lib/acl/templatedPolicy';
 
 export default class ConsulProvider {
     private _consul: Consul | undefined;
@@ -308,6 +310,15 @@ export default class ConsulProvider {
             throw new Error('Consul client not initialized');
         }
     }
+    public async snapshot(): Promise<Buffer> {
+        this.check();
+        const buf = this._consul!.snapshot();
+        return buf;
+    }
+    public async restore(buf: Buffer): Promise<void> {
+        this.check();
+        await this._consul!.restore(buf);
+    }
     public async list_policy(): Promise<PolicyResult[]> {
         this.check();
         return this._consul!.acl.policy.list();
@@ -335,15 +346,31 @@ export default class ConsulProvider {
         this.check();
         return this._consul!.acl.token.list();
     }
-    // public async add_token(opt: PolicyCreateOption): Promise<void> {
-    //     this.check();
-    //     this._consul!.acl.token.create(opt);
-    // }
-    // public async del_token(id: string): Promise<void> {
-    //     this.check();
-    //     this._consul!.acl.token.delete(id);
-    // }
-    
+    public async add_token(opt: PolicyCreateOption): Promise<void> {
+        this.check();
+        this._consul!.acl.token.create(opt);
+    }
+    public async del_token(id: string): Promise<void> {
+        this.check();
+        this._consul!.acl.token.delete(id);
+    }
+
+    public async list_role(): Promise<Role[]> {
+        this.check();
+        return this._consul!.acl.role.list();
+    }
+    public async add_role(opt: Role): Promise<void> {
+        this.check();
+        this._consul!.acl.role.create(opt);
+    }
+    public async del_role(id: string): Promise<void> {
+        this.check();
+        this._consul!.acl.role.delete(id);
+    }
+    public async list_template_policy(): Promise<TemplatedPolicy[]> {
+        this.check();
+        return this._consul!.acl.templatedPolicy.list()
+    }
 
     public createTreeItem(collapsibleState: vscode.TreeItemCollapsibleState): ConsulInstanceTreeItem {
         return new ConsulInstanceTreeItem(

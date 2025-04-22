@@ -4,6 +4,7 @@ import instanceBuild from './instance/command';
 import kvBuild from './kv/command';
 import catalogBuild from './catelog/command';
 import policy from './acl/policy/command';
+import token from './acl/token/command';
 
 
 export const build = (context: vscode.ExtensionContext, consulTreeProvider: ConsulTreeDataProvider): vscode.Disposable[] => {
@@ -11,6 +12,7 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
         ...instanceBuild(context, consulTreeProvider),
         ...kvBuild(context, consulTreeProvider),
         ...catalogBuild(context, consulTreeProvider),
-        ...policy(context, consulTreeProvider)
+        ...policy(context, consulTreeProvider),
+        ...token(context, consulTreeProvider)
     ];
 };

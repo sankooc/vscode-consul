@@ -1,10 +1,9 @@
-import { provideVSCodeDesignSystem, vsCodeButton, vsCodePanels, vsCodePanelTab, vsCodePanelView, vsCodeTextField } from "@vscode/webview-ui-toolkit";
+import {
+    provideVSCodeDesignSystem,
+    allComponents
+} from "@vscode/webview-ui-toolkit";
 
-// Register the VS Code design system
+// Register the VSCode design system with all components
 provideVSCodeDesignSystem().register(
-    vsCodeButton(),
-    vsCodeTextField(),
-    vsCodePanels(),
-    vsCodePanelTab(),
-    vsCodePanelView()
+    allComponents
 );

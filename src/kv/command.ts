@@ -102,11 +102,13 @@ export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTree
             });
             try {
                 if (key) {
+                    if(key?.startsWith('/') || key?.endsWith('/')){
+                        vscode.window.showErrorMessage('invalid key name');
+                        return;
+                    }
                     await provider.addKV(key);
                     consulTreeProvider.persistInstances();
                     consulTreeProvider.refresh();
-                    vscode.window.showInformationMessage('Successfully added key/value pair');
-
                 }
             } catch (e) {
                 console.error(e);

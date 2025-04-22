@@ -188,3 +188,18 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
     rename(oldUri: vscode.Uri, newUri: vscode.Uri): void {
     }
 }
+
+export const upperObj = (opt: any): any => {
+    if (!opt) {
+        return opt;
+    }
+    const rs: { [key: string]: any } = {};
+    for (const key of Object.keys(opt)) {
+        const value = opt[key];
+        if(value !== '' && value !== null && value !== undefined){
+            const upperKey = key.charAt(0).toUpperCase() + key.slice(1);
+            rs[upperKey] = value;
+        }
+    }
+    return rs;
+};

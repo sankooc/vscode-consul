@@ -5,7 +5,8 @@ import { ConsulTreeItem } from '../../providers/treeDataProvider';
 import { Role } from 'consul/lib/acl/role';
 
 class CTreeItem extends BasicTreeItem {
-    public roleId?: string;
+    public static readonly ROOT = 'role_root';
+    public static readonly LEAF = 'role_leaf';
     constructor(
         public readonly label: string,
         public readonly key: string,
@@ -14,11 +15,17 @@ class CTreeItem extends BasicTreeItem {
         public readonly provider: ConsulProvider | undefined,
     ) {
         super(label, collapsibleState);
-        this.description = '';
+        switch (this.contextValue) {
+            case CTreeItem.ROOT:
+                this.iconPath = new vscode.ThemeIcon('organization');
+                break;
+            default:
+                this.iconPath = new vscode.ThemeIcon('preview');
+        }
     }
     async getChildren(): Promise<ConsulTreeItem[]> {
         switch (this.contextValue) {
-            case 'root':
+            case CTreeItem.ROOT:
                 return [];
             default:
                 return [];

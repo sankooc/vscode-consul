@@ -29,8 +29,8 @@ class CTreeItem extends BasicTreeItem {
             new TokenTreeItem('Token', 'token', vscode.TreeItemCollapsibleState.Collapsed, TokenTreeItem.ROOT, this.provider),
             new RoleTreeItem('Role', 'role', vscode.TreeItemCollapsibleState.Collapsed, 'role_root', this.provider),
             new TemplatedPolicyTreeItem('Templated Policy', 'templatedPolicy', vscode.TreeItemCollapsibleState.Collapsed, 'tp_root', this.provider),
-            new MethodTreeItem('Auth Method', 'method', vscode.TreeItemCollapsibleState.Collapsed, 'method_root', this.provider),
-            new RuleTreeItem('Binding Rule', 'brule', vscode.TreeItemCollapsibleState.Collapsed, 'rule_root', this.provider),
+            // new MethodTreeItem('Auth Method', 'method', vscode.TreeItemCollapsibleState.Collapsed, 'method_root', this.provider),
+            // new RuleTreeItem('Binding Rule', 'brule', vscode.TreeItemCollapsibleState.Collapsed, 'rule_root', this.provider),
         ]
     }
     static rootItem(provider: ConsulProvider | undefined): CTreeItem {

@@ -119,6 +119,16 @@
         "command": "consul.acl.policy.del",
         "title": "Remove Consul Policy",
         "icon": "$(trash)"
+      },
+      {
+        "command": "consul.acl.token.add",
+        "title": "Add Consul ACLToken",
+        "icon": "$(add)"
+      },
+      {
+        "command": "consul.acl.token.del",
+        "title": "Remove Consul ACLToken",
+        "icon": "$(trash)"
       }
     ],
     "menus": {
@@ -203,6 +213,16 @@
         {
           "command": "consul.acl.policy.del",
           "when": "viewItem == policy_leaf",
+          "group": "inline"
+        },
+        {
+          "command": "consul.acl.token.add",
+          "when": "viewItem == token_root",
+          "group": "inline"
+        },
+        {
+          "command": "consul.acl.token.del",
+          "when": "viewItem == token_leaf",
           "group": "inline"
         }
       ]
