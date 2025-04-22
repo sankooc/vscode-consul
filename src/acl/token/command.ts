@@ -2,7 +2,6 @@ import { PolicyResult } from "consul/lib/acl/policy";
 import { ConsulTreeDataProvider } from "../../providers/treeDataProvider";
 import LoclTreeItem from './treeitem';
 import vscode from 'vscode';
-import { upperObj } from "../../common";
 
 function getWebviewContent(policies: PolicyResult[], toolkitUri: vscode.Uri) {
     return `<!DOCTYPE html>
@@ -26,9 +25,14 @@ function getWebviewContent(policies: PolicyResult[], toolkitUri: vscode.Uri) {
             .form-group > * {
                 width: 100%;
             }
-            .form-group-label {
+            .form-label {
                 display: block;
                 margin-bottom: 8px;
+                color: var(--vscode-foreground);
+            }
+            .optional-label {
+                color: var(--vscode-descriptionForeground);
+                font-size: 0.9em;
             }
             .policy-tags {
                 display: flex;
@@ -56,10 +60,6 @@ function getWebviewContent(policies: PolicyResult[], toolkitUri: vscode.Uri) {
                 gap: 8px;
                 margin-top: 24px;
             }
-            .optional-label {
-                color: var(--vscode-descriptionForeground);
-                font-size: 0.9em;
-            }
             vscode-details {
                 margin-top: 16px;
                 margin-bottom: 16px;
@@ -80,14 +80,6 @@ function getWebviewContent(policies: PolicyResult[], toolkitUri: vscode.Uri) {
             .loading vscode-progress-ring {
                 margin-bottom: 16px;
             }
-            vscode-text-field::part(control),
-            vscode-text-area::part(control),
-            vscode-dropdown::part(control) {
-                margin-top: 8px;
-            }
-            vscode-checkbox::part(control) {
-                margin-left: 8px;
-            }
         </style>
     </head>
     <body>
@@ -99,28 +91,28 @@ function getWebviewContent(policies: PolicyResult[], toolkitUri: vscode.Uri) {
         <div class="form-container" id="formContainer">
             <form id="tokenForm">
                 <div class="form-group">
-                    <label class="form-group-label">AccessorID <span class="optional-label">(optional)</span></label>
+                    <div class="form-label">AccessorID <span class="optional-label">(optional)</span></div>
                     <vscode-text-field id="accessorId">
                         <span slot="description">Leave empty for auto-generation</span>
                     </vscode-text-field>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-group-label">SecretID <span class="optional-label">(optional)</span></label>
+                    <div class="form-label">SecretID <span class="optional-label">(optional)</span></div>
                     <vscode-text-field id="secretId">
                         <span slot="description">Leave empty for auto-generation</span>
                     </vscode-text-field>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-group-label">Description <span class="optional-label">(optional)</span></label>
+                    <div class="form-label">Description <span class="optional-label">(optional)</span></div>
                     <vscode-text-area id="description" rows="3">
                         <span slot="description">Describe the purpose of this token</span>
                     </vscode-text-area>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-group-label">Policies <span class="optional-label">(optional)</span></label>
+                    <div class="form-label">Policies <span class="optional-label">(optional)</span></div>
                     <vscode-dropdown id="policySelector">
                         <span slot="description">Select policies to attach to this token</span>
                         <vscode-option value="">Select a policy to add...</vscode-option>
@@ -133,21 +125,21 @@ function getWebviewContent(policies: PolicyResult[], toolkitUri: vscode.Uri) {
                     <span slot="summary">Advanced Options</span>
                     <div class="advanced-options">
                         <div class="form-group">
-                            <label class="form-group-label">Local Token</label>
                             <vscode-checkbox id="local">
+                                Local Token
                                 <span slot="description">Token will not be replicated to other datacenters</span>
                             </vscode-checkbox>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-group-label">Expiration Time <span class="optional-label">(optional)</span></label>
+                            <div class="form-label">Expiration Time <span class="optional-label">(optional)</span></div>
                             <vscode-text-field type="datetime-local" id="expirationTime">
                                 <span slot="description">When this token should expire</span>
                             </vscode-text-field>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-group-label">Expiration TTL <span class="optional-label">(optional)</span></label>
+                            <div class="form-label">Expiration TTL <span class="optional-label">(optional)</span></div>
                             <vscode-text-field id="expirationTTL">
                                 <span slot="description">Time duration (e.g., "24h", "30m")</span>
                             </vscode-text-field>
@@ -238,7 +230,7 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
     const add = vscode.commands.registerCommand('consul.acl.token.add', async (item: LoclTreeItem) => {
         try {
             const policies = await item.provider?.list_policy() || [];
-            
+
             const panel = vscode.window.createWebviewPanel(
                 'addToken',
                 'Add ACL Token',
@@ -263,8 +255,16 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
                         case 'save':
                             try {
                                 const data = message.data;
-                                const opt = upperObj(data);
-                                await item.provider?.add_token(opt);
+                                console.log(data);
+                                // await item.provider?.add_token({
+                                //     AccessorID: data.accessorId,
+                                //     SecretID: data.secretId,
+                                //     Description: data.description,
+                                //     Policies: data.policies.map((name: string) => ({ Name: name })),
+                                //     Local: data.local,
+                                //     ExpirationTime: data.expirationTime,
+                                //     ExpirationTTL: data.expirationTTL
+                                // });
                                 vscode.window.showInformationMessage('Successfully added token');
                                 panel.dispose();
                                 provider.refresh();
@@ -296,6 +296,6 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to delete token: ${error}`);
         }
-    })
+    });
     return [add, del];
 };
