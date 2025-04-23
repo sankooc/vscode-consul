@@ -2,9 +2,9 @@
   "name": "vscode-consul",
   "displayName": "VSConsul",
   "description": "Consul integration for VS Code",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "engines": {
-		"vscode": "^1.86.2"
+    "vscode": "^1.86.2"
   },
   "repository": {
     "type": "git",
@@ -13,11 +13,11 @@
   "categories": [
     "Other"
   ],
-	"icon": "resources/icon128.png",
-	"keywords": [
-		"Consul",
-		"Service Discovery"
-	],
+  "icon": "resources/icon128.png",
+  "keywords": [
+    "Consul",
+    "Service Discovery"
+  ],
   "publisher": "sankooc",
   "activationEvents": [],
   "main": "./dist/extension.js",
@@ -244,18 +244,19 @@
     "build-webview": "esbuild media/webview/toolkit.js --bundle --outfile=media/webview/toolkit.bundle.js --format=esm --platform=browser"
   },
   "vsce": {
-		"dependencies": false,
-		"pnpm": true
-	},
+    "dependencies": false,
+    "pnpm": true
+  },
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.4.0",
-    "consul": "file:../node-consul"
+    "consul": "file:../node-consul",
+    "handlebars": "^4.7.8"
   },
   "devDependencies": {
     "@types/consul": "^0.40.3",
     "@types/mocha": "^10.0.6",
     "@types/node": "20.x",
-		"@types/vscode": "^1.86.2",
+    "@types/vscode": "^1.86.2",
     "@typescript-eslint/eslint-plugin": "^7.11.0",
     "@typescript-eslint/parser": "^7.11.0",
     "@vscode/test-cli": "^0.0.9",

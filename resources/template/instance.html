@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module" src="{{host}}/media/webview/toolkit.bundle.js"></script>
+    <style>
+        body {
+            padding: 20px;
+            color: var(--vscode-foreground);
+            font-family: var(--vscode-font-family);
+            background-color: var(--vscode-editor-background);
+        }
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: none;
+        }
+        .form-group {
+            margin-bottom: 24px;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .form-group:hover {
+            background-color: var(--vscode-list-hoverBackground);
+        }
+        .form-group > * {
+            width: 100%;
+        }
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--vscode-foreground);
+        }
+        .form-description {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--vscode-descriptionForeground);
+            font-size: 0.9em;
+        }
+        .form-control {
+            margin-top: 8px;
+        }
+        .form-control > * {
+            width: 100%;
+            display: block;
+        }
+        vscode-text-field,
+        vscode-text-area,
+        vscode-dropdown {
+            width: 100%;
+            display: block;
+        }
+        vscode-checkbox {
+            width: 100%;
+            display: block;
+            padding: 4px 0;
+        }
+        .button-container {
+            display: flex;
+            gap: 8px;
+            margin-top: 24px;
+        }
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .loading vscode-progress-ring {
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading" id="loading">
+        <vscode-progress-ring></vscode-progress-ring>
+        <div>Loading components...</div>
+    </div>
+
+    <div class="form-container" id="formContainer">
+        <form id="configForm">
+            <div class="form-group">
+                <div class="form-label">Host</div>
+                <div class="form-description">The hostname or IP address of your Consul server.</div>
+                <div class="form-control">
+                    <vscode-text-field id="host" value="{{config.host}}" placeholder="localhost"></vscode-text-field>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Port</div>
+                <div class="form-description">The port number your Consul server is listening on.</div>
+                <div class="form-control">
+                    <vscode-text-field id="port" type="number" value="{{config.port}}" placeholder="8500"></vscode-text-field>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Token <span class="optional-label">(optional)</span></div>
+                <div class="form-description">The ACL token to use for authentication.</div>
+                <div class="form-control">
+                    <vscode-text-field type="password" id="token" value="{{config.defaults.token}}" placeholder="Optional"></vscode-text-field>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Use HTTPS</div>
+                <div class="form-description">Enable secure HTTPS connection to the Consul server.</div>
+                <div class="form-control">
+                    <vscode-checkbox id="secure" {{config._secure}}></vscode-checkbox>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <vscode-button appearance="primary" id="testButton">Test Connection</vscode-button>
+                <vscode-button appearance="secondary" id="saveButton">Save</vscode-button>
+                <vscode-button appearance="secondary" id="cancelButton">Cancel</vscode-button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const vscode = acquireVsCodeApi();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('formContainer').style.display = 'block';
+            }, 100);
+        });
+
+        function getConfig() {
+            const cfg = {
+                host: document.getElementById('host').value || 'localhost',
+                port: parseInt(document.getElementById('port').value) || 8500,
+                secure: document.getElementById('secure').checked
+            };
+            const token = document.getElementById('token').value;
+            if (token) {
+                cfg.defaults = { token }
+            }
+            return cfg;
+        }
+
+        document.getElementById('testButton').addEventListener('click', () => {
+            vscode.postMessage({
+                command: 'test',
+                config: getConfig()
+            });
+        });
+
+        document.getElementById('saveButton').addEventListener('click', () => {
+            vscode.postMessage({
+                command: 'save',
+                config: getConfig()
+            });
+        });
+
+        document.getElementById('cancelButton').addEventListener('click', () => {
+            vscode.postMessage({
+                command: 'cancel'
+            });
+        });
+    </script>
+</body>
+
+</html>

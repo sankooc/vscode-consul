@@ -1,244 +1,86 @@
-
 import vscode from 'vscode';
-export const render = (context: vscode.ExtensionContext): string => {
-    const panel = vscode.window.createWebviewPanel(
-        'addToken',
-        'Add ACL Token',
-        vscode.ViewColumn.One,
-        {
-            enableScripts: true,
-            localResourceRoots: [
-                vscode.Uri.joinPath(context.extensionUri, 'media', 'webview')
-            ]
+import Handlebars from 'handlebars';
+import fs from 'node:fs';
+import path from 'node:path';
+
+interface ViewOption {
+    viewType: string;
+    title: string;
+    template: string;
+    key: string,
+    data: any;
+    handleMessage?: (panel: vscode.WebviewPanel, message: {command: string, data: any}) => Promise<void>;
+}
+const TEMPLATE_DIR = 'resources';
+const MEDIA = 'media';
+export default class Viewer {
+    private mapper: Record<string, HandlebarsTemplateDelegate<any>> = {};
+    
+    private configPanels: Map<string, vscode.WebviewPanel> = new Map();
+    private dir: vscode.Uri;
+    private jsfile: vscode.Uri;
+    constructor(private readonly context: vscode.ExtensionContext){
+        this.dir = context.extensionUri;
+        const extensionPath = this.dir.fsPath;
+        const templatePath = path.join(extensionPath, TEMPLATE_DIR, 'template');
+        try {
+            const files = fs.readdirSync(templatePath);
+            for(const ff of files) {
+                if(ff.endsWith('.html')) {
+                    const name = ff.substring(0, ff.length - 5);
+                    const template = fs.readFileSync(path.join(templatePath, ff), 'utf-8');
+                    this.mapper[name] = Handlebars.compile(template);
+                }
+            }
+            console.log('Template files:', files);
+        } catch (error) {
+            console.error('Error reading template directory:', error);
         }
-    );
-    const toolkitUri = panel.webview.asWebviewUri(
-        vscode.Uri.joinPath(context.extensionUri, 'media', 'webview', 'toolkit.bundle.js')
-    );
-    return `<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <script type="module" src="${toolkitUri}"></script>
-            <style>
-                body {
-                    padding: 20px;
-                }
-                .form-container {
-                    max-width: 800px;
-                    margin: 0 auto;
-                    display: none;
-                }
-                .form-group {
-                    margin-bottom: 24px;
-                }
-                .form-group > * {
-                    width: 100%;
-                }
-                .form-group-label {
-                    display: block;
-                    margin-bottom: 8px;
-                }
-                .policy-tags {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 8px;
-                    margin-top: 8px;
-                }
-                .policy-tag {
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                    background: var(--vscode-badge-background);
-                    color: var(--vscode-badge-foreground);
-                    padding: 2px 8px;
-                    border-radius: 3px;
-                    font-size: 12px;
-                }
-                .policy-tag vscode-button {
-                    padding: 2px;
-                    min-width: 16px;
-                    height: 16px;
-                }
-                .button-container {
-                    display: flex;
-                    gap: 8px;
-                    margin-top: 24px;
-                }
-                .optional-label {
-                    color: var(--vscode-descriptionForeground);
-                    font-size: 0.9em;
-                }
-                vscode-details {
-                    margin-top: 16px;
-                    margin-bottom: 16px;
-                }
-                .advanced-options {
-                    padding: 16px;
-                    background: var(--vscode-editor-background);
-                    border: 1px solid var(--vscode-widget-border);
-                    border-radius: 4px;
-                }
-                .loading {
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    text-align: center;
-                }
-                .loading vscode-progress-ring {
-                    margin-bottom: 16px;
-                }
-                vscode-text-field::part(control),
-                vscode-text-area::part(control),
-                vscode-dropdown::part(control) {
-                    margin-top: 8px;
-                }
-                vscode-checkbox::part(control) {
-                    margin-left: 8px;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="loading" id="loading">
-                <vscode-progress-ring></vscode-progress-ring>
-                <div>Loading components...</div>
-            </div>
+        this.jsfile = vscode.Uri.joinPath(context.extensionUri, MEDIA, 'webview', 'toolkit.bundle.js');
+    }
     
-            <div class="form-container" id="formContainer">
-                <form id="tokenForm">
-                    <div class="form-group">
-                        <label class="form-group-label">AccessorID <span class="optional-label">(optional)</span></label>
-                        <vscode-text-field id="accessorId">
-                            <span slot="description">Leave empty for auto-generation</span>
-                        </vscode-text-field>
-                    </div>
-    
-                    <div class="form-group">
-                        <label class="form-group-label">SecretID <span class="optional-label">(optional)</span></label>
-                        <vscode-text-field id="secretId">
-                            <span slot="description">Leave empty for auto-generation</span>
-                        </vscode-text-field>
-                    </div>
-    
-                    <div class="form-group">
-                        <label class="form-group-label">Description <span class="optional-label">(optional)</span></label>
-                        <vscode-text-area id="description" rows="3">
-                            <span slot="description">Describe the purpose of this token</span>
-                        </vscode-text-area>
-                    </div>
-    
-                    <div class="form-group">
-                        <label class="form-group-label">Policies <span class="optional-label">(optional)</span></label>
-                        <vscode-dropdown id="policySelector">
-                            <span slot="description">Select policies to attach to this token</span>
-                            <vscode-option value="">Select a policy to add...</vscode-option>
-                        </vscode-dropdown>
-                        <div class="policy-tags" id="policyTags"></div>
-                    </div>
-    
-                    <vscode-details>
-                        <span slot="summary">Advanced Options</span>
-                        <div class="advanced-options">
-                            <div class="form-group">
-                                <label class="form-group-label">Local Token</label>
-                                <vscode-checkbox id="local">
-                                    <span slot="description">Token will not be replicated to other datacenters</span>
-                                </vscode-checkbox>
-                            </div>
-    
-                            <div class="form-group">
-                                <label class="form-group-label">Expiration Time <span class="optional-label">(optional)</span></label>
-                                <vscode-text-field type="datetime-local" id="expirationTime">
-                                    <span slot="description">When this token should expire</span>
-                                </vscode-text-field>
-                            </div>
-    
-                            <div class="form-group">
-                                <label class="form-group-label">Expiration TTL <span class="optional-label">(optional)</span></label>
-                                <vscode-text-field id="expirationTTL">
-                                    <span slot="description">Time duration (e.g., "24h", "30m")</span>
-                                </vscode-text-field>
-                            </div>
-                        </div>
-                    </vscode-details>
-    
-                    <div class="button-container">
-                        <vscode-button appearance="primary" id="saveButton">Save</vscode-button>
-                        <vscode-button appearance="secondary" id="cancelButton">Cancel</vscode-button>
-                    </div>
-                </form>
-            </div>
-    
-            <script>
-                const vscode = acquireVsCodeApi();
-                const selectedPolicies = new Set();
-    
-                // 等待所有组件加载完成
-                document.addEventListener('DOMContentLoaded', () => {
-                    // 给组件一点时间初始化
-                    setTimeout(() => {
-                        document.getElementById('loading').style.display = 'none';
-                        document.getElementById('formContainer').style.display = 'block';
-                    }, 100);
-                });
-    
-                function updatePolicyTags() {
-                    const container = document.getElementById('policyTags');
-                    container.innerHTML = '';
-                    selectedPolicies.forEach(policy => {
-                        const tag = document.createElement('div');
-                        tag.className = 'policy-tag';
-                        tag.innerHTML = \`
-                            <span>\${policy}</span>
-                            <vscode-button appearance="icon" id="remove-\${policy}">×</vscode-button>
-                        \`;
-                        container.appendChild(tag);
-                        
-                        document.getElementById(\`remove-\${policy}\`).addEventListener('click', () => {
-                            selectedPolicies.delete(policy);
-                            updatePolicyTags();
-                        });
-                    });
-                }
-    
-                // Policy selector
-                document.getElementById('policySelector').addEventListener('change', (e) => {
-                    const value = e.target.value;
-                    if (value && !selectedPolicies.has(value)) {
-                        selectedPolicies.add(value);
-                        updatePolicyTags();
-                        e.target.value = '';
-                    }
-                });
-    
-                // Save button
-                document.getElementById('saveButton').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const formData = {
-                        accessorId: document.getElementById('accessorId').value,
-                        secretId: document.getElementById('secretId').value,
-                        description: document.getElementById('description').value,
-                        policies: Array.from(selectedPolicies),
-                        local: document.getElementById('local').checked,
-                        expirationTime: document.getElementById('expirationTime').value,
-                        expirationTTL: document.getElementById('expirationTTL').value
-                    };
-                    
-                    vscode.postMessage({
-                        command: 'save',
-                        data: formData
-                    });
-                });
-    
-                // Cancel button
-                document.getElementById('cancelButton').addEventListener('click', () => {
-                    vscode.postMessage({
-                        command: 'cancel'
-                    });
-                });
-            </script>
-        </body>
-        </html>`;
+    render(option: ViewOption): vscode.WebviewPanel {
+        const { template, key } = option;
+        const existingPanel = this.configPanels.get(key);
+        if (existingPanel) {
+            existingPanel.reveal();
+            return existingPanel;
+        }
+
+        const compiler = this.mapper[template];
+        if(!compiler){
+            throw new Error(`Template ${template} not found`);
+        }
+        const panel = vscode.window.createWebviewPanel(
+            option.viewType,
+            option.title,
+            vscode.ViewColumn.One,
+            {
+                enableScripts: true,
+                localResourceRoots: [
+                    vscode.Uri.joinPath(this.dir, MEDIA, 'webview'),
+                    vscode.Uri.joinPath(this.dir, TEMPLATE_DIR, 'template')
+                ]
+            }
+        );
+        this.configPanels.set(key, panel);
+        panel.onDidDispose(() => {
+            this.configPanels.delete(key);
+        });
+        // console.log('--- path test');
+        // console.log(this.jsfile.fsPath);
+        // const jsfile = panel.webview.asWebviewUri(this.jsfile).toString();
+        const host = panel.webview.asWebviewUri(this.context.extensionUri).toString();
+        // console.log(panel.webview.asWebviewUri(this.context.extensionUri).toString());
+        const data =  { host, ...option.data };
+        panel.webview.html = compiler(data);
+        panel.webview.onDidReceiveMessage(
+            async (message) => {
+                await option.handleMessage?.(panel, message);
+            },
+            undefined,
+            this.context.subscriptions
+        );
+        return panel;
+    }
 }

@@ -6,6 +6,7 @@ import ConsulInstanceTreeItem from '../instance/treeitem';
 import ACLTreeItem from '../acl/treeitem';
 import PolicyTreeItem from '../acl/policy/treeitem';
 import CatalogTreeItem from '../catelog/treeitem';
+import Viewer from '../view';
 
 interface ConsulInstanceInfo {
     label: string;
@@ -20,9 +21,11 @@ export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulTre
     private _onDidChangeTreeData: vscode.EventEmitter<void | ConsulInstanceTreeItem | null> = new vscode.EventEmitter<void | ConsulInstanceTreeItem | null>();
     readonly onDidChangeTreeData: vscode.Event<void | ConsulInstanceTreeItem | null> = this._onDidChangeTreeData.event;
     private consulInstances: Map<string, ConsulProvider> = new Map();
+    public readonly view: Viewer
 
     constructor(private context: vscode.ExtensionContext) {
         this.loadPersistedInstances();
+        this.view = new Viewer(context);
     }
 
     private loadPersistedInstances() {

@@ -4,136 +4,6 @@ import { ConsulTreeDataProvider } from "../providers/treeDataProvider";
 import vscode from 'vscode';
 import Consul from "consul";
 
-
-
-function getConfigWebviewContent(label: string, config: any, toolkitUri: vscode.Uri) {
-    return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <script type="module" src="${toolkitUri}"></script>
-            <style>
-                body {
-                    padding: 20px;
-                    color: var(--vscode-foreground);
-                    font-family: var(--vscode-font-family);
-                    background-color: var(--vscode-editor-background);
-                }
-                .form-group {
-                    margin-bottom: 20px;
-                }
-                vscode-text-field {
-                    width: 100%;
-                    margin-top: 5px;
-                }
-                .button-container {
-                    display: flex;
-                    gap: 10px;
-                    margin-top: 30px;
-                }
-                vscode-button {
-                    margin-right: 10px;
-                }
-            </style>
-        </head>
-        <body>
-            <vscode-panels>
-                <vscode-panel-tab id="tab-1">Connection</vscode-panel-tab>
-                <vscode-panel-view id="view-1">
-                    <form id="configForm">
-                        <div class="form-group">
-                            <vscode-text-field
-                                id="host"
-                                value="${config.host || ''}"
-                                placeholder="localhost">
-                                Host
-                            </vscode-text-field>
-                        </div>
-                        <div class="form-group">
-                            <vscode-text-field
-                                id="port"
-                                type="number"
-                                value="${config.port || '8500'}"
-                                placeholder="8500">
-                                Port
-                            </vscode-text-field>
-                        </div>
-                        <div class="form-group">
-                            <vscode-text-field
-                                type="password"
-                                id="token"
-                                value="${config.defaults?.token || ''}"
-                                placeholder="Optional">
-                                Token
-                            </vscode-text-field>
-                        </div>
-                        <div class="form-group">
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input
-                                    type="checkbox"
-                                    id="secure"
-                                    ${config.secure ? 'checked' : ''}
-                                    style="margin: 0;"
-                                >
-                                <span>Use HTTPS</span>
-                            </label>
-                        </div>
-                        <div class="button-container">
-                            <vscode-button appearance="primary" onclick="testConnection()">
-                                Test Connection
-                            </vscode-button>
-                            <vscode-button appearance="secondary" onclick="saveConfig()">
-                                Save
-                            </vscode-button>
-                            <vscode-button appearance="secondary" onclick="cancel()">
-                                Cancel
-                            </vscode-button>
-                        </div>
-                    </form>
-                </vscode-panel-view>
-            </vscode-panels>
-
-            <script>
-                const vscode = acquireVsCodeApi();
-
-                function getConfig() {
-                    const cfg ={
-                        host: document.getElementById('host').value || 'localhost',
-                        port: parseInt(document.getElementById('port').value) || 8500,
-                        secure: document.getElementById('secure').checked
-                    };
-                    const token = document.getElementById('token').value;
-                    if(token){
-                        cfg.defaults = { token }
-                    }
-                    return cfg;
-                }
-
-                function testConnection() {
-                    vscode.postMessage({
-                        command: 'test',
-                        config: getConfig()
-                    });
-                }
-
-                function saveConfig() {
-                    vscode.postMessage({
-                        command: 'save',
-                        config: getConfig()
-                    });
-                }
-
-                function cancel() {
-                    vscode.postMessage({ command: 'cancel' });
-                }
-            </script>
-        </body>
-        </html>
-    `;
-}
-
 export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvider): vscode.Disposable[] => {
 
     const addInstanceCommand = vscode.commands.registerCommand('consul.addInstance', async () => {
@@ -186,45 +56,12 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
         }
     });
 
-    const configPanels = new Map<string, vscode.WebviewPanel>();
-
     const configureInstanceCommand = vscode.commands.registerCommand('consul.configureInstance', async (node: ConsulInstanceTreeItem) => {
         if (!node) {
             return;
         }
 
-        const existingPanel = configPanels.get(node.label);
-        if (existingPanel) {
-            existingPanel.reveal();
-            return;
-        }
-
-        const panel = vscode.window.createWebviewPanel(
-            'consulConfig',
-            `Configure ${node.label}`,
-            vscode.ViewColumn.One,
-            {
-                enableScripts: true,
-                localResourceRoots: [
-                    vscode.Uri.joinPath(context.extensionUri, 'media', 'webview')
-                ]
-            }
-        );
-
-        configPanels.set(node.label, panel);
-
-        panel.onDidDispose(() => {
-            configPanels.delete(node.label);
-        });
-        const toolkitUri = panel.webview.asWebviewUri(
-            vscode.Uri.joinPath(context.extensionUri, 'media', 'webview', 'toolkit.bundle.js')
-        );
-
-        const currentConfig = node.provider.getConfig() || {};
-
-        panel.webview.html = getConfigWebviewContent(node.label, currentConfig, toolkitUri);
-
-        panel.webview.onDidReceiveMessage(async message => {
+        const handleMessage = async (panel: vscode.WebviewPanel, message: any) => {
             switch (message.command) {
                 case 'save':
                     try {
@@ -251,7 +88,23 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
                     panel.dispose();
                     break;
             }
-        });
+        };
+        
+        const currentConfig: any = node.provider.getConfig() || {host: '', port: 8500, secure: false, defaults: {token: ''}};
+        currentConfig._secure = currentConfig.secure ? 'checked': '';
+        const key = node.label;
+        const opt = {
+            viewType: 'consulConfig',
+            title: `Configure [${key}]`,
+            template: 'instance',
+            key: key,
+            handleMessage,
+            data: {
+                label: key,
+                config: currentConfig,
+            }
+        };
+        provider.view.render(opt);
     });
 
     const snapshot = vscode.commands.registerCommand('consul.snapshot', async (node: ConsulInstanceTreeItem) => {
