@@ -1,11 +1,9 @@
-import CatalogTreeItem from "./treeitem";
-import { ConsulTreeDataProvider } from "../providers/treeDataProvider";
+import CatalogTreeItem from './treeitem';
+import { ConsulTreeDataProvider } from '../providers/treeDataProvider';
 import vscode from 'vscode';
-import { buildRawDataURI } from "../common";
-
+import { buildRawDataURI } from '../common';
 
 export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTreeDataProvider): vscode.Disposable[] => {
-
     // vscode.workspace.registerTextDocumentContentProvider(CatalogTreeItem.schema, {
     //     async provideTextDocumentContent(uri: vscode.Uri, _: vscode.CancellationToken): Promise<string> {
     //         try {
@@ -13,7 +11,7 @@ export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTree
     //                 const opt = uri.query.split('=');
     //                 if(opt && opt[1]) {
     //                     const cont =  opt[1];
-    //                     return JSON.stringify(JSON.parse(cont), null, 2); 
+    //                     return JSON.stringify(JSON.parse(cont), null, 2);
     //                 }
     //             }
 

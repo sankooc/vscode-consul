@@ -1,6 +1,6 @@
 import vscode from 'vscode';
-import { BasicTreeItem } from "../common";
-import ConsulProvider from "../providers/consulProvider";
+import { BasicTreeItem } from '../common';
+import ConsulProvider from '../providers/consulProvider';
 import { ConsulTreeItem } from '../providers/treeDataProvider';
 import KVTreeItem from '../kv/treeitem';
 import ACLTreeItem from '../acl/treeitem';
@@ -27,10 +27,6 @@ export default class CTreeItem extends BasicTreeItem {
         if (!this.isConnected) {
             return [];
         }
-        return [
-            ACLTreeItem.rootItem(this.provider),
-            KVTreeItem.rootItem(this.provider),
-            CatalogTreeItem.rootItem(this.provider),
-        ];
+        return [ACLTreeItem.rootItem(this.provider), KVTreeItem.rootItem(this.provider), CatalogTreeItem.rootItem(this.provider)];
     }
 }

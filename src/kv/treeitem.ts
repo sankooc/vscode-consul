@@ -1,6 +1,6 @@
 import vscode from 'vscode';
-import { BasicTreeItem } from "../common";
-import ConsulProvider from "../providers/consulProvider";
+import { BasicTreeItem } from '../common';
+import ConsulProvider from '../providers/consulProvider';
 import { ConsulTreeItem } from '../providers/treeDataProvider';
 
 export interface ConsulTreeNode {
@@ -24,7 +24,7 @@ export default class CTreeItem extends BasicTreeItem {
             this.command = {
                 command: 'consul.openKVEditor',
                 title: 'Edit KV',
-                arguments: [this]
+                arguments: [this],
             };
         }
         if (this.contextValue === 'kvRoot') {
@@ -42,10 +42,10 @@ export default class CTreeItem extends BasicTreeItem {
     public async getChildren(): Promise<ConsulTreeItem[]> {
         if (this.contextValue === 'kvRoot' && this.provider && this.provider.isConnected) {
             const items = await this.provider.getKVTree();
-            return this.buildKVTree(items)
+            return this.buildKVTree(items);
         }
 
-        return this.children || []
+        return this.children || [];
     }
 
     public buildKVTree(items: string[]): CTreeItem[] {
@@ -58,7 +58,7 @@ export default class CTreeItem extends BasicTreeItem {
                 if (i === parts.length - 1) {
                     current[part] = {
                         isLeaf: true,
-                        key: item
+                        key: item,
                     };
                 } else {
                     current[part] = current[part] || {};
@@ -74,22 +74,9 @@ export default class CTreeItem extends BasicTreeItem {
             const currentPath = path ? `${path}/${name}` : name;
             if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
                 if (value.isLeaf) {
-                    return new CTreeItem(
-                        name,
-                        currentPath,
-                        vscode.TreeItemCollapsibleState.None,
-                        'kvLeaf',
-                        this.provider
-                    );
+                    return new CTreeItem(name, currentPath, vscode.TreeItemCollapsibleState.None, 'kvLeaf', this.provider);
                 } else {
-                    return new CTreeItem(
-                        name,
-                        currentPath,
-                        vscode.TreeItemCollapsibleState.Collapsed,
-                        'kvFolder',
-                        this.provider,
-                        this.convertToTreeItems(value as ConsulTreeNode, currentPath)
-                    );
+                    return new CTreeItem(name, currentPath, vscode.TreeItemCollapsibleState.Collapsed, 'kvFolder', this.provider, this.convertToTreeItems(value as ConsulTreeNode, currentPath));
                 }
             }
             throw new Error(`Unexpected value type for key ${name}`);

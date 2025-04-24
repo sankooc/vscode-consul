@@ -7,7 +7,6 @@ export const log = function (...args: any) {
     console.log(...args);
 };
 
-
 export interface ConsulNode {
     ID: string;
     Node: string;
@@ -56,8 +55,6 @@ export interface ConsulService {
     ModifyIndex?: number;
 }
 
-
-
 export interface KVItem {
     key: string;
     value: string;
@@ -83,7 +80,6 @@ export const unzipData = function (buf: Uint8Array): KVItem[] {
     return items;
 };
 
-
 export class BasicTreeItem extends vscode.TreeItem {
     constructor(label: string, collapsibleState: vscode.TreeItemCollapsibleState) {
         super(label, collapsibleState);
@@ -93,18 +89,16 @@ export class BasicTreeItem extends vscode.TreeItem {
     }
 }
 
-
-
 export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
     private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
     private content_map = new Map<string, T>();
 
     readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
 
-    constructor(protected cProvider: ConsulTreeDataProvider) { }
+    constructor(protected cProvider: ConsulTreeDataProvider) {}
 
     watch(uri: vscode.Uri): vscode.Disposable {
-        return new vscode.Disposable(() => { });
+        return new vscode.Disposable(() => {});
     }
 
     async _read(provider: ConsulProvider, id: string): Promise<[string, T]> {
@@ -140,14 +134,14 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
         return [];
     }
 
-    createDirectory(uri: vscode.Uri): void { }
+    createDirectory(uri: vscode.Uri): void {}
 
     async readFile(uri: vscode.Uri): Promise<Uint8Array> {
         const _content = await this.content(uri);
         return new TextEncoder().encode(_content);
     }
 
-    async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
+    async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean }): Promise<void> {
         const _path = uri.path;
         const cache = this.content_map.get(_path);
         const [_, label, id] = _path.split('/');
@@ -167,17 +161,21 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
         const [_, label, id] = _path.split('/');
         const provider = this.cProvider.getActiveProvider(label);
         if (provider) {
-            this._delete(provider, id).then((result) => {
-                if (result) {
-                    this.content_map.delete(_path);
-                    this._emitter.fire([{
-                        type: vscode.FileChangeType.Deleted,
-                        uri: uri
-                    }]);
-                }
-            }).catch((error) => {
-                vscode.window.showErrorMessage(`Failed to delete: ${error}`);
-            });
+            this._delete(provider, id)
+                .then((result) => {
+                    if (result) {
+                        this.content_map.delete(_path);
+                        this._emitter.fire([
+                            {
+                                type: vscode.FileChangeType.Deleted,
+                                uri: uri,
+                            },
+                        ]);
+                    }
+                })
+                .catch((error) => {
+                    vscode.window.showErrorMessage(`Failed to delete: ${error}`);
+                });
         }
     }
 
@@ -185,8 +183,7 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
         return false;
     }
 
-    rename(oldUri: vscode.Uri, newUri: vscode.Uri): void {
-    }
+    rename(oldUri: vscode.Uri, newUri: vscode.Uri): void {}
 }
 
 export const upperObj = (opt: any): any => {
@@ -203,7 +200,6 @@ export const upperObj = (opt: any): any => {
     }
     return rs;
 };
-
 
 export const RAW_DATA_SCHEMA = 'raw-data';
 
@@ -234,7 +230,7 @@ export const buildRawDataURI = (name: string, type: string, data: string): vscod
     return vscode.Uri.from({
         scheme: RAW_DATA_SCHEMA,
         path: `/${name}`,
-        query: `type=${encodeURIComponent(type)}&data=${encodeURIComponent(data)}`
+        query: `type=${encodeURIComponent(type)}&data=${encodeURIComponent(data)}`,
     });
     // return vscode.Uri.parse(`${RAW_DATA_SCHEMA}:/${name}?type=${type}&data=${encodeURIComponent(data)}`).with({ scheme: RAW_DATA_SCHEMA });
 };

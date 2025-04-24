@@ -1,13 +1,12 @@
-import { ConsulTreeDataProvider } from "../../providers/treeDataProvider";
+import { ConsulTreeDataProvider } from '../../providers/treeDataProvider';
 import LoclTreeItem from './treeitem';
 import vscode from 'vscode';
-import { upperObj } from "../../common";
+import { upperObj } from '../../common';
 
 export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvider): vscode.Disposable[] => {
-    
     const add = vscode.commands.registerCommand('consul.acl.role.add', async (item: LoclTreeItem) => {
-        const policies = await item.provider?.list_policy() || [];
-        const handleMessage = async (panel: vscode.WebviewPanel, message: { command: string, data: any }) => {
+        const policies = (await item.provider?.list_policy()) || [];
+        const handleMessage = async (panel: vscode.WebviewPanel, message: { command: string; data: any }) => {
             switch (message.command) {
                 case 'save':
                     try {
@@ -25,14 +24,14 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
                     panel.dispose();
                     break;
             }
-        }
+        };
         const opt = {
             viewType: 'role-view',
             title: 'Add ACL Role',
             key: 'create',
             template: 'role',
             handleMessage,
-            data: { policies }
+            data: { policies },
         };
         provider.view.render(opt);
     });

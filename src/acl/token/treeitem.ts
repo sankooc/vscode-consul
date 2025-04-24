@@ -13,7 +13,7 @@ class CTreeItem extends BasicTreeItem {
         public readonly key: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
         public readonly contextValue: string,
-        public readonly provider: ConsulProvider | undefined,
+        public readonly provider: ConsulProvider | undefined
     ) {
         super(label, collapsibleState);
         this.description = '';
@@ -34,13 +34,7 @@ class CTreeItem extends BasicTreeItem {
                     return items.map((item: TokenResult) => {
                         const id = item.AccessorID;
                         const name = id.length > 8 ? id.substring(id.length - 8) : id;
-                        const it = new CTreeItem(
-                            name,
-                            id,
-                            vscode.TreeItemCollapsibleState.None,
-                            CTreeItem.LEAF,
-                            this.provider
-                        );
+                        const it = new CTreeItem(name, id, vscode.TreeItemCollapsibleState.None, CTreeItem.LEAF, this.provider);
                         it.SecretID = item.SecretID;
                         it.description = item.Description;
                         return it;

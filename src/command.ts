@@ -9,13 +9,12 @@ import role from './acl/role/command';
 import tp from './acl/templatedPolicy/command';
 import { parseQuery, RAW_DATA_SCHEMA } from './common';
 
-
 export const build = (context: vscode.ExtensionContext, consulTreeProvider: ConsulTreeDataProvider): vscode.Disposable[] => {
     vscode.workspace.registerTextDocumentContentProvider(RAW_DATA_SCHEMA, {
         async provideTextDocumentContent(uri: vscode.Uri, _: vscode.CancellationToken): Promise<string> {
             const content = parseQuery(uri.query);
             return content;
-        }
+        },
     });
     return [
         ...instanceBuild(context, consulTreeProvider),
@@ -24,6 +23,6 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
         ...policy(context, consulTreeProvider),
         ...token(context, consulTreeProvider),
         ...tp(context, consulTreeProvider),
-        ...role(context, consulTreeProvider)
+        ...role(context, consulTreeProvider),
     ];
 };

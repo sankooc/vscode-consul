@@ -1,4 +1,4 @@
-import { ConsulTreeDataProvider } from "../../providers/treeDataProvider";
+import { ConsulTreeDataProvider } from '../../providers/treeDataProvider';
 import LoclTreeItem from './treeitem';
 import vscode from 'vscode';
 

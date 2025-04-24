@@ -13,7 +13,7 @@ class CTreeItem extends BasicTreeItem {
         public readonly key: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
         public readonly contextValue: string,
-        public readonly provider: ConsulProvider | undefined,
+        public readonly provider: ConsulProvider | undefined
     ) {
         super(label, collapsibleState);
         switch (this.contextValue) {
@@ -25,13 +25,7 @@ class CTreeItem extends BasicTreeItem {
         }
     }
     child(item: TemplatedPolicy): CTreeItem {
-        const it = new CTreeItem(
-            item.TemplateName,
-            item.TemplateName,
-            vscode.TreeItemCollapsibleState.None,
-            CTreeItem.LEAF,
-            this.provider
-        );
+        const it = new CTreeItem(item.TemplateName, item.TemplateName, vscode.TreeItemCollapsibleState.None, CTreeItem.LEAF, this.provider);
         it.description = item.Description;
         it.item = item;
         return it;

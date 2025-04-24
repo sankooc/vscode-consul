@@ -31,7 +31,7 @@ class CTreeItem extends BasicTreeItem {
             new TemplatedPolicyTreeItem('Templated Policy', 'templatedPolicy', vscode.TreeItemCollapsibleState.Collapsed, TemplatedPolicyTreeItem.ROOT, this.provider),
             // new MethodTreeItem('Auth Method', 'method', vscode.TreeItemCollapsibleState.Collapsed, 'method_root', this.provider),
             // new RuleTreeItem('Binding Rule', 'brule', vscode.TreeItemCollapsibleState.Collapsed, 'rule_root', this.provider),
-        ]
+        ];
     }
     static rootItem(provider: ConsulProvider | undefined): CTreeItem {
         return new CTreeItem('ACL', 'acl', vscode.TreeItemCollapsibleState.Collapsed, 'root', provider);

@@ -6,7 +6,7 @@ import { RegisterOptions } from 'consul/lib/agent/service';
 import { ConsulNode, ConsulService, KVItem } from '../common';
 import ConsulInstanceTreeItem from '../instance/treeitem';
 import KVTreeItem from '../kv/treeitem';
-import CatalogTreeItem  from '../catelog/treeitem';
+import CatalogTreeItem from '../catelog/treeitem';
 import { PolicyCreateOption, PolicyResult } from 'consul/lib/acl/policy';
 import { TokenResult } from 'consul/lib/acl/token';
 import { Role } from 'consul/lib/acl/role';
@@ -23,7 +23,7 @@ export default class ConsulProvider {
     private _isConnected: boolean = false;
 
     private _instance: any | undefined;
-    constructor(private label: string) { }
+    constructor(private label: string) {}
 
     public get isConnected(): boolean {
         return this._isConnected;
@@ -59,7 +59,8 @@ export default class ConsulProvider {
         try {
             this._consul = new Consul(this.cfg);
             const sf = await this._consul.agent.self();
-            if (sf?.Config?.NodeName) { //todo ??
+            if (sf?.Config?.NodeName) {
+                //todo ??
                 this._instance = sf.Config;
                 this._isConnected = true;
             } else {
@@ -302,7 +303,6 @@ export default class ConsulProvider {
             vscode.window.showErrorMessage('Failed to register');
             throw error;
         }
-
     }
 
     check(): void {
@@ -369,14 +369,10 @@ export default class ConsulProvider {
     }
     public async list_template_policy(): Promise<TemplatedPolicy[]> {
         this.check();
-        return this._consul!.acl.templatedPolicy.list()
+        return this._consul!.acl.templatedPolicy.list();
     }
 
     public createTreeItem(collapsibleState: vscode.TreeItemCollapsibleState): ConsulInstanceTreeItem {
-        return new ConsulInstanceTreeItem(
-            this.label,
-            this,
-            collapsibleState
-        );
+        return new ConsulInstanceTreeItem(this.label, this, collapsibleState);
     }
 }

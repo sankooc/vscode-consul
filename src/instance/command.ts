@@ -1,20 +1,19 @@
-import { ConsulOptions } from "consul/lib/consul";
-import ConsulInstanceTreeItem from "./treeitem";
-import { ConsulTreeDataProvider } from "../providers/treeDataProvider";
+import { ConsulOptions } from 'consul/lib/consul';
+import ConsulInstanceTreeItem from './treeitem';
+import { ConsulTreeDataProvider } from '../providers/treeDataProvider';
 import vscode from 'vscode';
-import Consul from "consul";
+import Consul from 'consul';
 
 export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvider): vscode.Disposable[] => {
-
     const addInstanceCommand = vscode.commands.registerCommand('consul.addInstance', async () => {
         const _name = await vscode.window.showInputBox({
             prompt: 'Enter a name for the Consul instance',
-            placeHolder: 'e.g., Local Development'
+            placeHolder: 'e.g., Local Development',
         });
         const name = _name?.trim();
 
         if (name) {
-            if(/\s|\/|\:/i.test(name)){
+            if (/\s|\/|\:/i.test(name)) {
                 vscode.window.showErrorMessage('Instance name invalid');
                 return;
             }
@@ -89,9 +88,9 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
                     break;
             }
         };
-        
-        const currentConfig: any = node.provider.getConfig() || {host: '', port: 8500, secure: false, defaults: {token: ''}};
-        currentConfig._secure = currentConfig.secure ? 'checked': '';
+
+        const currentConfig: any = node.provider.getConfig() || { host: '', port: 8500, secure: false, defaults: { token: '' } };
+        currentConfig._secure = currentConfig.secure ? 'checked' : '';
         const key = node.label;
         const opt = {
             viewType: 'consulConfig',
@@ -102,7 +101,7 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
             data: {
                 label: key,
                 config: currentConfig,
-            }
+            },
         };
         provider.view.render(opt);
     });
@@ -110,12 +109,12 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
     const snapshot = vscode.commands.registerCommand('consul.snapshot', async (node: ConsulInstanceTreeItem) => {
         try {
             const saveUri = await vscode.window.showSaveDialog({
-                filters: { 'Snapshot File': ['snapshot'] }
+                filters: { 'Snapshot File': ['snapshot'] },
             });
             if (!saveUri) {
                 return;
             }
-            if(node.provider){
+            if (node.provider) {
                 const buf = await node.provider.snapshot();
                 await vscode.workspace.fs.writeFile(saveUri, buf);
                 vscode.window.showInformationMessage('Snapshot saved successfully');
@@ -127,7 +126,7 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
     const restore = vscode.commands.registerCommand('consul.restore', async (node: ConsulInstanceTreeItem) => {
         const openUris = await vscode.window.showOpenDialog({
             filters: { 'snapshot File': ['snapshot'] },
-            canSelectMany: false
+            canSelectMany: false,
         });
         if (!openUris || openUris.length === 0) {
             return;
@@ -135,7 +134,7 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
         const fileUri = openUris[0];
         const fileData = await vscode.workspace.fs.readFile(fileUri);
         try {
-            if(node.provider){
+            if (node.provider) {
                 await node.provider.restore(Buffer.from(fileData));
                 vscode.window.showInformationMessage('Snapshot restored successfully');
             }
@@ -143,5 +142,5 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
             console.error(error);
         }
     });
-    return [addInstanceCommand, removeInstanceCommand, refreshCommand, connectCommand, disconnectCommand, configureInstanceCommand,snapshot, restore];
+    return [addInstanceCommand, removeInstanceCommand, refreshCommand, connectCommand, disconnectCommand, configureInstanceCommand, snapshot, restore];
 };

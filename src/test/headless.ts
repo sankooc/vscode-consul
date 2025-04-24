@@ -1,7 +1,3 @@
+const cases = () => {};
 
-
-const cases = () => {
-};
-
-
-(cases)();
+cases();

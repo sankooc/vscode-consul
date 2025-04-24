@@ -1,8 +1,7 @@
-import { buildRawDataURI } from "../../common";
-import { ConsulTreeDataProvider } from "../../providers/treeDataProvider";
+import { buildRawDataURI } from '../../common';
+import { ConsulTreeDataProvider } from '../../providers/treeDataProvider';
 import LoclTreeItem from './treeitem';
 import vscode from 'vscode';
-
 
 export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvider): vscode.Disposable[] => {
     const schema = vscode.commands.registerCommand('consul.acl.templatedPolicy.view.schema', async (item: LoclTreeItem) => {
@@ -26,7 +25,7 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
                 await vscode.window.showTextDocument(doc);
             }
         }
-    })
+    });
     return [schema, template];
 
     // const add = vscode.commands.registerCommand('consul.acl.templatedPolicy.add', async (item: LoclTreeItem) => {

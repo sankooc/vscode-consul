@@ -1,12 +1,12 @@
-import { ConsulTreeDataProvider } from "../../providers/treeDataProvider";
+import { ConsulTreeDataProvider } from '../../providers/treeDataProvider';
 import LoclTreeItem from './treeitem';
 import vscode from 'vscode';
-import ConsulProvider from "../../providers/consulProvider";
-import { ConsulFileSystemProvider } from "../../common";
+import ConsulProvider from '../../providers/consulProvider';
+import { ConsulFileSystemProvider } from '../../common';
 interface PolicyCache {
-    name: string,
-    size: number,
-    permissions?: number
+    name: string;
+    size: number;
+    permissions?: number;
 }
 
 class PolicyFSProvider extends ConsulFileSystemProvider<PolicyCache> {
@@ -34,24 +34,21 @@ class PolicyFSProvider extends ConsulFileSystemProvider<PolicyCache> {
 }
 
 export default (context: vscode.ExtensionContext, cProvider: ConsulTreeDataProvider): vscode.Disposable[] => {
-
     const pfsp = new PolicyFSProvider(cProvider);
     const registration = vscode.workspace.registerFileSystemProvider(LoclTreeItem.scheme, pfsp, {
         isCaseSensitive: true,
-        isReadonly: false
+        isReadonly: false,
     });
 
     const add = vscode.commands.registerCommand('consul.acl.policy.add', async (item: LoclTreeItem) => {
-
-        const handleMessage = async (panel: vscode.WebviewPanel, message: { command: string, data: any }) => {
-            
+        const handleMessage = async (panel: vscode.WebviewPanel, message: { command: string; data: any }) => {
             switch (message.command) {
                 case 'save':
                     try {
                         const { name, description } = message.data;
                         await item.provider?.add_policy({
                             Name: name,
-                            Description: description
+                            Description: description,
                         });
                         vscode.window.showInformationMessage(`Successfully added policy: ${name}`);
                         panel.dispose();
@@ -64,25 +61,21 @@ export default (context: vscode.ExtensionContext, cProvider: ConsulTreeDataProvi
                     panel.dispose();
                     break;
             }
-        }
+        };
         const opt = {
             viewType: 'addPolicy',
             title: 'Add ACL Policy',
             template: 'policy',
             key: 'create',
             handleMessage,
-            data: { }
+            data: {},
         };
         cProvider.view.render(opt);
     });
 
     const del = vscode.commands.registerCommand('consul.acl.policy.del', async (item: LoclTreeItem) => {
         try {
-            const answer = await vscode.window.showWarningMessage(
-                `Are you sure you want to delete policy '${item.key}'?`,
-                { modal: true },
-                'Yes'
-            );
+            const answer = await vscode.window.showWarningMessage(`Are you sure you want to delete policy '${item.key}'?`, { modal: true }, 'Yes');
 
             if (answer !== 'Yes') {
                 return;

@@ -12,7 +12,7 @@ class CTreeItem extends BasicTreeItem {
         public readonly key: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
         public readonly contextValue: string,
-        public readonly provider: ConsulProvider | undefined,
+        public readonly provider: ConsulProvider | undefined
     ) {
         super(label, collapsibleState);
         switch (this.contextValue) {
@@ -30,14 +30,8 @@ class CTreeItem extends BasicTreeItem {
     async getChildren(): Promise<ConsulTreeItem[]> {
         switch (this.contextValue) {
             case CTreeItem.ROOT:
-                const roles = await this.provider?.list_role() || [];
-                return roles.map(role => new CTreeItem(
-                    role.Name,
-                    role.ID!,
-                    vscode.TreeItemCollapsibleState.None,
-                    CTreeItem.LEAF,
-                    this.provider
-                ));
+                const roles = (await this.provider?.list_role()) || [];
+                return roles.map((role) => new CTreeItem(role.Name, role.ID!, vscode.TreeItemCollapsibleState.None, CTreeItem.LEAF, this.provider));
             default:
                 return [];
         }

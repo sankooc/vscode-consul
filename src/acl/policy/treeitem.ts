@@ -4,7 +4,6 @@ import { BasicTreeItem } from '../../common';
 import { ConsulTreeItem } from '../../providers/treeDataProvider';
 import { PolicyResult } from 'consul/lib/acl/policy';
 
-
 class CTreeItem extends BasicTreeItem {
     // public policyId?: string;
     public static ROOT = 'policy_root';
@@ -14,7 +13,7 @@ class CTreeItem extends BasicTreeItem {
         public readonly key: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
         public readonly contextValue: string,
-        public readonly provider: ConsulProvider | undefined,
+        public readonly provider: ConsulProvider | undefined
     ) {
         super(label, collapsibleState);
         this.description = '';
@@ -27,7 +26,7 @@ class CTreeItem extends BasicTreeItem {
                 this.command = {
                     command: 'consul.acl.policy.edit',
                     title: 'Edit',
-                    arguments: [this]
+                    arguments: [this],
                 };
         }
     }
@@ -35,13 +34,7 @@ class CTreeItem extends BasicTreeItem {
         switch (this.contextValue) {
             case CTreeItem.ROOT:
                 return ((await this.provider?.list_policy()) || []).map((item: PolicyResult) => {
-                    const ct = new CTreeItem(
-                        item.Name,
-                        item.ID!,
-                        vscode.TreeItemCollapsibleState.None,
-                        CTreeItem.isBuildinId(item.ID!) ? 'policy_build_leaf' :'policy_leaf',
-                        this.provider
-                    );
+                    const ct = new CTreeItem(item.Name, item.ID!, vscode.TreeItemCollapsibleState.None, CTreeItem.isBuildinId(item.ID!) ? 'policy_build_leaf' : 'policy_leaf', this.provider);
                     ct.description = item.Description;
                     return ct;
                 });

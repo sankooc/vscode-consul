@@ -11,7 +11,7 @@ class CTreeItem extends BasicTreeItem {
         public readonly key: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
         public readonly contextValue: string,
-        public readonly provider: ConsulProvider | undefined,
+        public readonly provider: ConsulProvider | undefined
     ) {
         super(label, collapsibleState);
         this.description = '';

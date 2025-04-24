@@ -1,8 +1,7 @@
 import vscode from 'vscode';
-import { BasicTreeItem } from "../common";
-import ConsulProvider from "../providers/consulProvider";
+import { BasicTreeItem } from '../common';
+import ConsulProvider from '../providers/consulProvider';
 import { ConsulTreeItem } from '../providers/treeDataProvider';
-
 
 export default class CTreeItem extends BasicTreeItem {
     private static readonly contentMap: Map<string, any> = new Map();
@@ -13,7 +12,7 @@ export default class CTreeItem extends BasicTreeItem {
         public readonly content: any,
         // public readonly tags: string[],
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-        public readonly provider: ConsulProvider | undefined,
+        public readonly provider: ConsulProvider | undefined
     ) {
         super(label, collapsibleState);
         // this.tooltip = `${label} [${tags.join(', ')}]`;
@@ -37,7 +36,6 @@ export default class CTreeItem extends BasicTreeItem {
         }
     }
 
-
     public async getChildren(): Promise<ConsulTreeItem[]> {
         const provider = this.provider;
         if (!provider || !provider.isConnected) {
@@ -46,28 +44,14 @@ export default class CTreeItem extends BasicTreeItem {
         switch (this.type) {
             case 'root':
                 const list = await provider.getNodes();
-                return list.map(node => {
+                return list.map((node) => {
                     // const url = vscode.Uri.parse(`${scheme}:/node/${this.node}`).with({ scheme });
-                    return new CTreeItem(
-                        node.Address,
-                        'node',
-                        node.ID,
-                        node,
-                        vscode.TreeItemCollapsibleState.Collapsed,
-                        provider
-                    );
+                    return new CTreeItem(node.Address, 'node', node.ID, node, vscode.TreeItemCollapsibleState.Collapsed, provider);
                 });
             case 'node':
                 const ss = await provider.getServices(this.node);
-                return ss.map(node => {
-                    return new CTreeItem(
-                        node.Service,
-                        'service',
-                        this.node,
-                        node,
-                        vscode.TreeItemCollapsibleState.None,
-                        provider
-                    );
+                return ss.map((node) => {
+                    return new CTreeItem(node.Service, 'service', this.node, node, vscode.TreeItemCollapsibleState.None, provider);
                 });
 
             default:
@@ -82,5 +66,4 @@ export default class CTreeItem extends BasicTreeItem {
         const scheme = CTreeItem.schema;
         return vscode.Uri.parse(`${scheme}:/raw?data=${JSON.stringify(this.content)}`).with({ scheme });
     }
-
 }

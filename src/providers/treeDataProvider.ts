@@ -13,15 +13,13 @@ interface ConsulInstanceInfo {
     config: ConsulOptions | null;
 }
 
-
 export type ConsulTreeItem = ConsulInstanceTreeItem | KVTreeItem | CatalogTreeItem | ACLTreeItem | PolicyTreeItem;
-
 
 export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulTreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<void | ConsulInstanceTreeItem | null> = new vscode.EventEmitter<void | ConsulInstanceTreeItem | null>();
     readonly onDidChangeTreeData: vscode.Event<void | ConsulInstanceTreeItem | null> = this._onDidChangeTreeData.event;
     private consulInstances: Map<string, ConsulProvider> = new Map();
-    public readonly view: Viewer
+    public readonly view: Viewer;
 
     constructor(private context: vscode.ExtensionContext) {
         this.loadPersistedInstances();
@@ -30,11 +28,11 @@ export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulTre
 
     private loadPersistedInstances() {
         const instances = this.context.globalState.get<ConsulInstanceInfo[]>('consulInstances', []);
-        instances.forEach(instance => {
+        instances.forEach((instance) => {
             const { label, config } = instance;
             const provider = new ConsulProvider(label);
             this.consulInstances.set(label, provider);
-            if(config){
+            if (config) {
                 provider.setConfig(config);
             }
         });
@@ -44,7 +42,7 @@ export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulTre
     public async persistInstances() {
         const instances: ConsulInstanceInfo[] = Array.from(this.consulInstances.entries()).map(([label, provider]) => ({
             label,
-            config: provider.getConfig()
+            config: provider.getConfig(),
         }));
         await this.context.globalState.update('consulInstances', instances);
     }
@@ -65,10 +63,10 @@ export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulTre
         return element;
     }
 
-    async getChildren(element?: ConsulTreeItem): Promise<(ConsulTreeItem)[]> {
+    async getChildren(element?: ConsulTreeItem): Promise<ConsulTreeItem[]> {
         if (!element) {
-            return Array.from(this.consulInstances.entries()).map(([label, provider]) => 
-                provider.createTreeItem(provider.isConnected?vscode.TreeItemCollapsibleState.Collapsed: vscode.TreeItemCollapsibleState.None )
+            return Array.from(this.consulInstances.entries()).map(([label, provider]) =>
+                provider.createTreeItem(provider.isConnected ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None)
             );
         }
 
