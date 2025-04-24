@@ -33,6 +33,7 @@
     "consul.acl.token.del.title": "移除 Consul ACL令牌",
     "consul.acl.role.add.title": "添加角色",
     "consul.acl.role.del.title": "删除角色",
+    "consul.acl.role.edit.title": "编辑角色",
     "consul.acl.templatedPolicy.view.schema.title": "模式",
     "consul.acl.templatedPolicy.view.template.title": "模板"
 }

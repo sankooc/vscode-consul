@@ -96,6 +96,30 @@
             height: 16px;
         }
 
+        .role-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .role-tag {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--vscode-badge-background);
+            color: var(--vscode-badge-foreground);
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .role-tag vscode-button {
+            padding: 2px;
+            min-width: 16px;
+            height: 16px;
+        }
+
         .button-container {
             display: flex;
             gap: 8px;
@@ -175,6 +199,20 @@
             </div>
 
             <div class="form-group">
+                <div class="form-label">Roles <span class="optional-label">(optional)</span></div>
+                <div class="form-description">Select roles to attach to this token.</div>
+                <div class="form-control">
+                    <vscode-dropdown id="roleSelector">
+                        <vscode-option value="">Select a role to add...</vscode-option>
+                        {{#each roles}}
+                            <vscode-option value="{{Name}}">{{Name}}</vscode-option>
+                        {{/each}}
+                    </vscode-dropdown>
+                    <div class="role-tags" id="roleTags"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
                 <div class="form-label">Local Token</div>
                 <div class="form-description">When enabled, the token will not be replicated to other datacenters.</div>
                 <div class="form-control">
@@ -208,14 +246,45 @@
     <script>
         const vscode = acquireVsCodeApi();
         const selectedPolicies = new Set();
+        const selectedRoles = new Set();
+        const state = {
+            key: '{{key}}'
+        };
 
-        // 等待所有组件加载完成
         document.addEventListener('DOMContentLoaded', () => {
-            // 给组件一点时间初始化
-            setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('formContainer').style.display = 'block';
-            }, 100);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('formContainer').style.display = 'block';
+
+            // 如果是编辑模式，填充现有数据
+            {{#if token}}
+            const token = {{{json token}}};
+            document.getElementById('accessorId').value = token.AccessorID || '';
+            document.getElementById('accessorId').disabled = true;
+            document.getElementById('secretId').value = token.SecretID || '';
+            document.getElementById('secretId').disabled = true;
+            document.getElementById('description').value = token.Description || '';
+            document.getElementById('local').checked = token.Local || false;
+            document.getElementById('expirationTime').value = token.ExpirationTime || '';
+            document.getElementById('expirationTTL').value = token.ExpirationTTL || '';
+
+            if (token.Policies) {
+                token.Policies.forEach(policy => {
+                    if (policy.Name) {
+                        selectedPolicies.add(policy.Name);
+                    }
+                });
+                updatePolicyTags();
+            }
+
+            if (token.Roles) {
+                token.Roles.forEach(role => {
+                    if (role.Name) {
+                        selectedRoles.add(role.Name);
+                    }
+                });
+                updateRoleTags();
+            }
+            {{/if}}
         });
 
         function updatePolicyTags() {
@@ -226,13 +295,32 @@
                 tag.className = 'policy-tag';
                 tag.innerHTML = `
                     <span>${policy}</span>
-                    <vscode-button appearance="icon" id="remove-${policy}">×</vscode-button>
+                    <vscode-button appearance="icon" id="remove-policy-${policy}">×</vscode-button>
                 `;
                 container.appendChild(tag);
 
-                document.getElementById(`remove-${policy}`).addEventListener('click', () => {
+                document.getElementById(`remove-policy-${policy}`).addEventListener('click', () => {
                     selectedPolicies.delete(policy);
                     updatePolicyTags();
+                });
+            });
+        }
+
+        function updateRoleTags() {
+            const container = document.getElementById('roleTags');
+            container.innerHTML = '';
+            selectedRoles.forEach(role => {
+                const tag = document.createElement('div');
+                tag.className = 'policy-tag';
+                tag.innerHTML = `
+                    <span>${role}</span>
+                    <vscode-button appearance="icon" id="remove-role-${role}">×</vscode-button>
+                `;
+                container.appendChild(tag);
+
+                document.getElementById(`remove-role-${role}`).addEventListener('click', () => {
+                    selectedRoles.delete(role);
+                    updateRoleTags();
                 });
             });
         }
@@ -247,6 +335,16 @@
             }
         });
 
+        // Role selector
+        document.getElementById('roleSelector').addEventListener('change', (e) => {
+            const value = e.target.value;
+            if (value && !selectedRoles.has(value)) {
+                selectedRoles.add(value);
+                updateRoleTags();
+                e.target.value = '';
+            }
+        });
+
         // Save button
         document.getElementById('saveButton').addEventListener('click', (e) => {
             e.preventDefault();
@@ -254,7 +352,8 @@
                 accessorId: document.getElementById('accessorId').value,
                 secretId: document.getElementById('secretId').value,
                 description: document.getElementById('description').value,
-                policies: Array.from(selectedPolicies),
+                policies: Array.from(selectedPolicies).map(name => ({ Name: name })),
+                roles: Array.from(selectedRoles).map(name => ({ Name: name })),
                 local: document.getElementById('local').checked,
                 expirationTime: document.getElementById('expirationTime').value,
                 expirationTTL: document.getElementById('expirationTTL').value

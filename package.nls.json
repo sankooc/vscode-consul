@@ -2,7 +2,7 @@
     "consul.snapshot": "Consul Snapshot",
     "consul.snapshot.failed": "Create snapshot failed: {0}",
     "consul.snapshot.success": "Create snapshot success",
-    "consul.restore": "Consul Restore 1",
+    "consul.restore": "Consul Restore",
     "consul.restore.failed": "Restore snapshot failed: {0}",
     "consul.restore.success": "Restore snapshot complete",
     "consul.addInstance.title": "Add Consul Instance",

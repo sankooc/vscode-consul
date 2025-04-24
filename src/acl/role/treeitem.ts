@@ -22,6 +22,11 @@ class CTreeItem extends BasicTreeItem {
             case CTreeItem.LEAF:
                 this.iconPath = new vscode.ThemeIcon('preview');
                 this.description = this.key;
+                this.command = {
+                    command: 'consul.acl.role.edit',
+                    title: 'Edit Role',
+                    arguments: [this],
+                };
                 break;
             default:
                 this.iconPath = new vscode.ThemeIcon('preview');

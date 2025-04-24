@@ -13,6 +13,11 @@ interface ViewOption {
 }
 const TEMPLATE_DIR = 'resources';
 const MEDIA = 'media';
+
+Handlebars.registerHelper('json', function (context) {
+    return JSON.stringify(context);
+});
+
 export default class Viewer {
     private mapper: Record<string, HandlebarsTemplateDelegate<any>> = {};
 

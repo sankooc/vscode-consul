@@ -21,7 +21,7 @@
 **VSCode for Consul** is a Visual Studio Code extension that integrates HashiCorp Consul functionalities directly into your IDE, enabling seamless service discovery and configuration management.
 
 
-![](https://i.ibb.co/ksLSxSMR/vsconsul.png)
+![](https://i.ibb.co/B5K4L6fp/vsc-2.png)
 
 ## Features
 
@@ -31,7 +31,6 @@
 - **Configuration Interface**: Provides a configuration page for Consul instances that are not yet connected, allowing you to set connection options with save, cancel, and test connection functionalities.
 - **Enhanced Security**: Added confirmation dialogs for critical operations like deleting instances, ACL tokens, and roles.
 - **Snapshot Management**: Create and restore Consul snapshots with improved UI navigation.
-- **Internationalization**: Full support for multiple languages through VS Code's built-in localization system.
 - **ACL Management**: Comprehensive management of Consul ACL tokens and roles with safety confirmations.
 
 ## Usage
@@ -53,7 +52,6 @@
 ## Requirements
 
 - Visual Studio Code version 1.86.2 or higher.
-- Node.js and npm installed on your machine.
 
 ## Contributing
 

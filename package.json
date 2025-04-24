@@ -309,10 +309,8 @@
     "pnpm": true
   },
   "dependencies": {
-    "consul": "file:../node-consul",
-    "handlebars": "^4.7.8",
-    "hcl-to-json": "^0.1.1",
-    "hcl2-parser": "^1.0.3"
+    "consul": "github:sankooc/node-consul#2.0.1-acl",
+    "handlebars": "^4.7.8"
   },
   "devDependencies": {
     "@types/consul": "^0.40.3",

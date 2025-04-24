@@ -140,12 +140,32 @@
     <script>
         const vscode = acquireVsCodeApi();
         const selectedPolicies = new Set();
+        const state = {
+            key: '{{key}}'
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('formContainer').style.display = 'block';
-            }, 100);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('formContainer').style.display = 'block';
+            {{#if role}}
+                const role = {{{json role}}};
+                document.getElementById('name').value = role.Name || '';
+                document.getElementById('description').value = role.Description || '';
+                if (role.Policies) {
+                    role.Policies.forEach(policy => {
+                        if (policy.Name) {
+                            selectedPolicies.add(policy.Name);
+                        }
+                    });
+                    updatePolicyTags();
+                }
+                // 在编辑模式下禁用名称字段
+                if (state.key === 'edit') {
+                    document.getElementById('name').disabled = true;
+                }
+            {{/if}}
         });
+
         function updatePolicyTags() {
             const container = document.getElementById('policyTags');
             container.innerHTML = '';
@@ -163,6 +183,7 @@
                 });
             });
         }
+
         // Policy selector
         document.getElementById('policySelector').addEventListener('change', (e) => {
             const value = e.target.value;
@@ -172,6 +193,7 @@
                 e.target.value = '';
             }
         });
+
         // Save button
         document.getElementById('saveButton').addEventListener('click', (e) => {
             e.preventDefault();
@@ -185,6 +207,7 @@
                 data: formData
             });
         });
+
         // Cancel button
         document.getElementById('cancelButton').addEventListener('click', () => {
             vscode.postMessage({
