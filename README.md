@@ -1,6 +1,5 @@
 # VSCode for Consul
 
-
 <p align="center">
   <a href="/">
     <img src="https://img.shields.io/github/license/sankooc/vscode-consul" alt="License">
@@ -22,7 +21,7 @@
 **VSCode for Consul** is a Visual Studio Code extension that integrates HashiCorp Consul functionalities directly into your IDE, enabling seamless service discovery and configuration management.
 
 
-![](https://i.ibb.co/ksLSxSMR/vsconsul.png)
+![](https://i.ibb.co/B5K4L6fp/vsc-2.png)
 
 ## Features
 
@@ -30,18 +29,29 @@
 - **Key/Value Store Management**: Perform CRUD operations on Consul's KV store with ease.
 - **Catalog Browsing**: Explore and view details of services and nodes registered in Consul's catalog.
 - **Configuration Interface**: Provides a configuration page for Consul instances that are not yet connected, allowing you to set connection options with save, cancel, and test connection functionalities.
+- **Enhanced Security**: Added confirmation dialogs for critical operations like deleting instances, ACL tokens, and roles.
+- **Snapshot Management**: Create and restore Consul snapshots with improved UI navigation.
+- **ACL Management**: Comprehensive management of Consul ACL tokens and roles with safety confirmations.
 
 ## Usage
 
-- **Manage Consul Instances**: Use the activity bar to add or remove Consul instances.
-- **Explore Catalog**: Navigate through the Consul catalog to view services and nodes.
-- **Edit KV Pairs**: Select a KV leaf node to open an editor for modifying key-value pairs.
-- **Configure Instances**: Click the configuration button on disconnected instances to open the settings page.
+- **Manage Consul Instances**: 
+  - Use the activity bar to add or remove Consul instances
+  - Confirmation dialog ensures safety when deleting instances
+- **Explore Catalog**: Navigate through the Consul catalog to view services and nodes
+- **Edit KV Pairs**: Select a KV leaf node to open an editor for modifying key-value pairs
+- **Configure Instances**: Click the configuration button on disconnected instances to open the settings page
+- **Manage Snapshots**: 
+  - Create snapshots of your Consul configuration
+  - Restore configurations from existing snapshots
+- **ACL Management**:
+  - Create and manage ACL tokens and roles
+  - Safe deletion with confirmation dialogs
+  - Fine-grained access control
 
 ## Requirements
 
 - Visual Studio Code version 1.86.2 or higher.
-- Node.js and npm installed on your machine.
 
 ## Contributing
 

@@ -3,33 +3,42 @@ import ConsulInstanceTreeItem from './treeitem';
 import { ConsulTreeDataProvider } from '../providers/treeDataProvider';
 import vscode from 'vscode';
 import Consul from 'consul';
+import { anyToString } from '../common';
 
 export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvider): vscode.Disposable[] => {
+    const localize = (message: string, ...args: Array<string | number | boolean>) => {
+        return vscode.l10n.t(message, args);
+    };
     const addInstanceCommand = vscode.commands.registerCommand('consul.addInstance', async () => {
         const _name = await vscode.window.showInputBox({
-            prompt: 'Enter a name for the Consul instance',
-            placeHolder: 'e.g., Local Development',
+            prompt: localize('Add Consul Instance'),
+            placeHolder: localize('Instance Name'),
         });
         const name = _name?.trim();
 
         if (name) {
             if (/\s|\/|\:/i.test(name)) {
-                vscode.window.showErrorMessage('Instance name invalid');
+                vscode.window.showErrorMessage(localize('Invalid Instance Name'));
                 return;
             }
             try {
                 await provider.addConsulInstance(name);
-                vscode.window.showInformationMessage(`Successfully added Consul instance: ${name}`);
+                vscode.window.showInformationMessage(localize('Instance Added Successfully', name));
             } catch (error) {
-                vscode.window.showErrorMessage(`Failed to add Consul instance: ${error}`);
+                vscode.window.showErrorMessage(localize('Failed to Add Instance', anyToString(error)));
             }
         }
     });
 
     const removeInstanceCommand = vscode.commands.registerCommand('consul.removeInstance', async (node) => {
         if (node) {
+            const answer = await vscode.window.showWarningMessage(vscode.l10n.t('Are you sure you want to delete instance {0} ?', node.label), { modal: true }, 'Yes');
+
+            if (answer !== 'Yes') {
+                return;
+            }
             await provider.removeConsulInstance(node.label);
-            vscode.window.showInformationMessage(`Removed Consul instance: ${node.label}`);
+            vscode.window.showInformationMessage(localize('Instance Removed Successfully', node.label));
         }
     });
 
@@ -41,9 +50,8 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
         if (node) {
             try {
                 await provider.connectInstance(node.label);
-                // vscode.window.showInformationMessage(`Connected to Consul instance: ${node.label}`);
             } catch (error) {
-                vscode.window.showErrorMessage(`Failed to connect: ${error}`);
+                vscode.window.showErrorMessage(localize('Failed to Connect to Instance', anyToString(error)));
             }
         }
     });
@@ -51,7 +59,7 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
     const disconnectCommand = vscode.commands.registerCommand('consul.disconnect', async (node) => {
         if (node) {
             await provider.disconnectInstance(node.label);
-            vscode.window.showInformationMessage(`Disconnected from Consul instance: ${node.label}`);
+            vscode.window.showInformationMessage(localize('Instance Disconnected Successfully', node.label));
         }
     });
 
@@ -67,10 +75,10 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
                         const cfg: ConsulOptions = message.config;
                         node.provider.setConfig(cfg);
                         await provider.persistInstances();
-                        vscode.window.showInformationMessage('Configuration saved successfully');
+                        vscode.window.showInformationMessage(localize('Configuration Saved Successfully'));
                         panel.dispose();
                     } catch (error) {
-                        vscode.window.showErrorMessage(`Failed to save configuration: ${error}`);
+                        vscode.window.showErrorMessage(localize('Failed to Save Configuration', anyToString(error)));
                     }
                     break;
                 case 'test':
@@ -78,9 +86,9 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
                         const cfg: ConsulOptions = message.config;
                         const consul = new Consul(cfg);
                         await consul.agent.members();
-                        vscode.window.showInformationMessage(`Connection[${node.label}] test successful`);
+                        vscode.window.showInformationMessage(localize('Configuration Test Successful', node.label));
                     } catch (error) {
-                        vscode.window.showErrorMessage(`Connection test failed: ${error}`);
+                        vscode.window.showErrorMessage(localize('Failed to Test Configuration', anyToString(error)));
                     }
                     break;
                 case 'cancel':
@@ -94,7 +102,7 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
         const key = node.label;
         const opt = {
             viewType: 'consulConfig',
-            title: `Configure [${key}]`,
+            title: localize('Configure Consul Instance', key),
             template: 'instance',
             key: key,
             handleMessage,
@@ -106,41 +114,44 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
         provider.view.render(opt);
     });
 
-    const snapshot = vscode.commands.registerCommand('consul.snapshot', async (node: ConsulInstanceTreeItem) => {
+    const snapshotCommand = vscode.commands.registerCommand('consul.snapshot', async (item: ConsulInstanceTreeItem) => {
         try {
             const saveUri = await vscode.window.showSaveDialog({
                 filters: { 'Snapshot File': ['snapshot'] },
+                title: localize('Save Consul Snapshot'),
             });
             if (!saveUri) {
                 return;
             }
-            if (node.provider) {
-                const buf = await node.provider.snapshot();
+            if (item.provider) {
+                const buf = await item.provider.snapshot();
                 await vscode.workspace.fs.writeFile(saveUri, buf);
-                vscode.window.showInformationMessage('Snapshot saved successfully');
+                vscode.window.showInformationMessage(localize('Snapshot Saved Successfully'));
             }
         } catch (error) {
-            console.error(error);
+            vscode.window.showErrorMessage(localize('Failed to Save Snapshot {0}', anyToString(error)));
         }
     });
-    const restore = vscode.commands.registerCommand('consul.restore', async (node: ConsulInstanceTreeItem) => {
-        const openUris = await vscode.window.showOpenDialog({
-            filters: { 'snapshot File': ['snapshot'] },
-            canSelectMany: false,
-        });
-        if (!openUris || openUris.length === 0) {
-            return;
-        }
-        const fileUri = openUris[0];
-        const fileData = await vscode.workspace.fs.readFile(fileUri);
+
+    const restoreCommand = vscode.commands.registerCommand('consul.restore', async (item: ConsulInstanceTreeItem) => {
         try {
-            if (node.provider) {
-                await node.provider.restore(Buffer.from(fileData));
-                vscode.window.showInformationMessage('Snapshot restored successfully');
+            const openUris = await vscode.window.showOpenDialog({
+                filters: { 'Snapshot File': ['snapshot'] },
+                canSelectMany: false,
+                title: localize('Consul Restore'),
+            });
+            if (openUris && openUris[0] && item.provider) {
+                const fileData = await vscode.workspace.fs.readFile(openUris[0]);
+                await item.provider.restore(Buffer.from(fileData));
+                provider.persistInstances();
+                provider.refresh();
+                vscode.window.showInformationMessage(localize('Snapshot Restored Successfully'));
+                return;
             }
         } catch (error) {
-            console.error(error);
+            vscode.window.showErrorMessage(localize('Failed to Restore Snapshot: {}', anyToString(error)));
         }
     });
-    return [addInstanceCommand, removeInstanceCommand, refreshCommand, connectCommand, disconnectCommand, configureInstanceCommand, snapshot, restore];
+
+    return [addInstanceCommand, removeInstanceCommand, refreshCommand, connectCommand, disconnectCommand, configureInstanceCommand, snapshotCommand, restoreCommand];
 };

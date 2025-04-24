@@ -42,113 +42,123 @@
     "commands": [
       {
         "command": "consul.addInstance",
-        "title": "Add Consul Instance",
+        "title": "%consul.addInstance.title%",
         "icon": "$(add)"
       },
       {
         "command": "consul.removeInstance",
-        "title": "Remove Consul Instance",
+        "title": "%consul.removeInstance.title%",
         "icon": "$(trash)"
       },
       {
         "command": "consul.connect",
-        "title": "Connect",
+        "title": "%consul.connect.title%",
         "icon": "$(plug)"
       },
       {
         "command": "consul.disconnect",
-        "title": "Disconnect",
+        "title": "%consul.disconnect.title%",
         "icon": "$(debug-disconnect)"
       },
       {
         "command": "consul.refresh",
-        "title": "Refresh",
+        "title": "%consul.refresh.title%",
         "icon": "$(refresh)"
       },
       {
         "command": "consul.refreshKV",
-        "title": "Refresh KV",
+        "title": "%consul.refreshKV.title%",
         "icon": "$(refresh)"
       },
       {
         "command": "consul.addKV",
-        "title": "Add Key/Value",
+        "title": "%consul.addKV.title%",
         "icon": "$(add)"
       },
       {
         "command": "consul.editKV",
-        "title": "Edit Value",
+        "title": "%consul.editKV.title%",
         "icon": "$(edit)"
       },
       {
         "command": "consul.deleteKV",
-        "title": "Delete Key",
+        "title": "%consul.deleteKV.title%",
         "icon": "$(trash)"
       },
       {
         "command": "consul.configureInstance",
-        "title": "Configure Consul Instance",
+        "title": "%consul.configureInstance.title%",
         "icon": "$(gear)"
       },
       {
         "command": "consul.deleteKVPair",
-        "title": "Delete KV Pair",
+        "title": "%consul.deleteKVPair.title%",
         "icon": "$(trash)"
       },
       {
         "command": "consul.service.view",
         "icon": "$(bracket)",
-        "title": "detail"
+        "title": "%consul.service.view.title%"
       },
       {
         "command": "consul.exportAllKV",
-        "title": "Export All KV",
+        "title": "%consul.exportAllKV.title%",
         "icon": "$(clone)"
       },
       {
         "command": "consul.importAllKV",
-        "title": "Import All KV",
+        "title": "%consul.importAllKV.title%",
         "icon": "$(replace)"
       },
       {
         "command": "consul.acl.policy.add",
-        "title": "Add Consul Policy",
+        "title": "%consul.acl.policy.add.title%",
         "icon": "$(add)"
       },
       {
         "command": "consul.acl.policy.del",
-        "title": "Remove Consul Policy",
+        "title": "%consul.acl.policy.del.title%",
         "icon": "$(trash)"
       },
       {
         "command": "consul.acl.token.add",
-        "title": "Add Consul ACLToken",
+        "title": "%consul.acl.token.add.title%",
         "icon": "$(add)"
       },
       {
         "command": "consul.acl.token.del",
-        "title": "Remove Consul ACLToken",
+        "title": "%consul.acl.token.del.title%",
         "icon": "$(trash)"
       },
       {
         "command": "consul.acl.role.add",
-        "title": "Add Role",
+        "title": "%consul.acl.role.add.title%",
         "icon": "$(add)"
       },
       {
         "command": "consul.acl.role.del",
-        "title": "Delete Role",
+        "title": "%consul.acl.role.del.title%",
         "icon": "$(trash)"
       },
       {
         "command": "consul.acl.templatedPolicy.view.schema",
-        "title": "schema",
+        "title": "%consul.acl.templatedPolicy.view.schema.title%",
         "icon": "$(circuit-board)"
       },
       {
         "command": "consul.acl.templatedPolicy.view.template",
-        "title": "template",
+        "title": "%consul.acl.templatedPolicy.view.template.title%",
         "icon": "$(circuit-board)"
+      },
+      {
+        "command": "consul.snapshot",
+        "title": "%consul.snapshot%",
+        "icon": "$(save)"
+      },
+      {
+        "command": "consul.restore",
+        "title": "%consul.restore%",
+        "icon": "$(sync)"
       }
     ],
     "menus": {
@@ -167,7 +177,7 @@
       "view/item/context": [
         {
           "command": "consul.removeInstance",
-          "when": "viewItem == consulInstanceConnected || viewItem == consulInstanceDisconnected",
+          "when": "viewItem == consulInstanceDisconnected",
           "group": "inline"
         },
         {
@@ -179,6 +189,21 @@
           "command": "consul.disconnect",
           "when": "viewItem == consulInstanceConnected",
           "group": "inline"
+        },
+        {
+          "command": "consul.configureInstance",
+          "when": "viewItem == consulInstanceDisconnected",
+          "group": "inline"
+        },
+        {
+          "command": "consul.snapshot",
+          "when": "viewItem == consulInstanceConnected",
+          "group": "navigation"
+        },
+        {
+          "command": "consul.restore",
+          "when": "viewItem == consulInstanceConnected",
+          "group": "navigation"
         },
         {
           "command": "consul.addKV",
@@ -198,11 +223,6 @@
         {
           "command": "consul.refreshKV",
           "when": "viewItem == kvRoot",
-          "group": "inline"
-        },
-        {
-          "command": "consul.configureInstance",
-          "when": "view == consulInstances && viewItem == consulInstanceDisconnected",
           "group": "inline"
         },
         {
@@ -289,8 +309,7 @@
     "pnpm": true
   },
   "dependencies": {
-    "@vscode/webview-ui-toolkit": "^1.4.0",
-    "consul": "file:../node-consul",
+    "consul": "github:sankooc/node-consul#2.0.1-acl",
     "handlebars": "^4.7.8"
   },
   "devDependencies": {
@@ -302,7 +321,8 @@
     "@typescript-eslint/parser": "^7.11.0",
     "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^2.4.0",
-    "esbuild": "^0.21.5",
+    "@vscode/webview-ui-toolkit": "^1.4.0",
+    "esbuild": ">=0.25.0",
     "eslint": "^8.57.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.5.3",

@@ -8,9 +8,11 @@ import ConsulInstanceTreeItem from '../instance/treeitem';
 import KVTreeItem from '../kv/treeitem';
 import CatalogTreeItem from '../catelog/treeitem';
 import { PolicyCreateOption, PolicyResult } from 'consul/lib/acl/policy';
-import { TokenResult } from 'consul/lib/acl/token';
+import { TokenResult, TokenUpdateOptions } from 'consul/lib/acl/token';
 import { Role } from 'consul/lib/acl/role';
 import { TemplatedPolicy } from 'consul/lib/acl/templatedPolicy';
+// import * as parser from 'hcl2-parser';
+// import htj from 'hcl-to-json';
 
 export default class ConsulProvider {
     private _consul: Consul | undefined;
@@ -21,8 +23,8 @@ export default class ConsulProvider {
 
     private cfg: ConsulOptions | undefined;
     private _isConnected: boolean = false;
-
-    private _instance: any | undefined;
+    private token?: TokenResult;
+    private rules: any[] = [];
     constructor(private label: string) {}
 
     public get isConnected(): boolean {
@@ -52,20 +54,96 @@ export default class ConsulProvider {
         return 'unkown';
     }
 
+    public checkPermission(acl: string): boolean {
+        return true; // TODO
+        // if (!this.rules || this.rules.length === 0) {
+        //     return false;
+        // }
+
+        // const [resource, operation] = acl.split(':');
+        // if (!resource || !operation) {
+        //     return false;
+        // }
+
+        // Check each policy rule
+        // for (const rule of this.rules) {
+        // try {
+        // const parsed = parse(rule);
+
+        // // Check operator policy (full access)
+        // if (parsed.operator === 'write') {
+        //     return true;
+        // }
+
+        // // Check key permissions
+        // if (resource === 'key' && parsed.key) {
+        //     for (const [path, permissions] of Object.entries(parsed.key)) {
+        //         // Check if the permission matches
+        //         if (permissions[operation] === 'allow') {
+        //             return true;
+        //         }
+        //     }
+        // }
+
+        // // Check service permissions
+        // if (resource === 'service' && parsed.service) {
+        //     for (const [serviceName, permissions] of Object.entries(parsed.service)) {
+        //         if (permissions[operation] === 'allow') {
+        //             return true;
+        //         }
+        //     }
+        // }
+
+        // // Check node permissions
+        // if (resource === 'node' && parsed.node) {
+        //     for (const [nodeName, permissions] of Object.entries(parsed.node)) {
+        //         if (permissions[operation] === 'allow') {
+        //             return true;
+        //         }
+        //     }
+        // }
+
+        // } catch (error) {
+        //     console.error('Failed to parse HCL rule:', error);
+        //     continue;
+        // }
+        // }
+
+        // return false;
+    }
+
     public async connect(): Promise<void> {
         if (!this.cfg) {
             throw new Error('no consul config');
         }
         try {
             this._consul = new Consul(this.cfg);
-            const sf = await this._consul.agent.self();
-            if (sf?.Config?.NodeName) {
-                //todo ??
-                this._instance = sf.Config;
-                this._isConnected = true;
-            } else {
-                vscode.window.showErrorMessage('connect failed');
+            const token = await this._consul.acl.token.readSelf();
+            const { Policies } = token;
+            if (!Policies || !Policies.length) {
+                throw new Error('no policies');
             }
+            for (const p of Policies) {
+                const { ID } = p;
+                const { Rules } = await this._consul.acl.policy.read(ID);
+                if (Rules) {
+                    // const rs = parser.parseToObject(Rules);
+                    // this.rules.push(...rs);
+                    this.rules.push(Rules);
+                }
+            }
+            this.token = token;
+            this._isConnected = true;
+
+            // this._consul.acl.policy.read();
+            // const sf = await this._consul.agent.self();
+            // if (sf?.Config?.NodeName) {
+            //     //todo ??
+            //     // this._instance = sf.Config;
+            //     this._isConnected = true;
+            // } else {
+            //     vscode.window.showErrorMessage('connect failed');
+            // }
         } catch (error) {
             this._isConnected = false;
             throw error;
@@ -128,62 +206,11 @@ export default class ConsulProvider {
             }
 
             return Array.isArray(result) ? result : [result];
-            // return await ConsulProvider.buildKVTree(this, items);
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to get KV pairs: ${error}`);
             return [];
         }
     }
-
-    // public static buildKVTree(provider: ConsulProvider | undefined, items: Array<string>): KVTreeItem[] {
-    //     const root: { [key: string]: any } = {};
-    //     for (const item of items) {
-    //         const parts: string[] = item.split('/');
-    //         let current = root;
-    //         for (let i = 0; i < parts.length; i++) {
-    //             const part = parts[i];
-    //             if (i === parts.length - 1) {
-    //                 current[part] = {
-    //                     isLeaf: true,
-    //                     key: item
-    //                 };
-    //             } else {
-    //                 current[part] = current[part] || {};
-    //                 current = current[part];
-    //             }
-    //         }
-    //     }
-
-    //     return this.convertToTreeItems(provider, root, '');
-    // }
-
-    // public static convertToTreeItems(provider: ConsulProvider | undefined, node: ConsulTreeNode, path: string = ''): KVTreeItem[] {
-    //     return Object.entries(node).map(([name, value]) => {
-    //         const currentPath = path ? `${path}/${name}` : name;
-    //         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-    //             if (value.isLeaf) {
-    //                 return new KVTreeItem(
-    //                     name,
-    //                     currentPath,
-    //                     vscode.TreeItemCollapsibleState.None,
-    //                     'kvLeaf',
-    //                     provider
-    //                 );
-    //             } else {
-    //                 return new KVTreeItem(
-    //                     name,
-    //                     currentPath,
-    //                     vscode.TreeItemCollapsibleState.Collapsed,
-    //                     'kvFolder',
-    //                     undefined,
-    //                     this.convertToTreeItems(provider, value as ConsulTreeNode, currentPath)
-    //                 );
-    //             }
-    //         }
-    //         // Handle other cases or throw an error
-    //         throw new Error(`Unexpected value type for key ${name}`);
-    //     });
-    // }
 
     public async getNodes(): Promise<ConsulNode[]> {
         if (!this._consul) {
@@ -350,6 +377,14 @@ export default class ConsulProvider {
         this.check();
         this._consul!.acl.token.create(opt);
     }
+    public async read_token(id: string): Promise<TokenResult> {
+        this.check();
+        return this._consul!.acl.token.read(id);
+    }
+    public async update_token(id: string, data: TokenUpdateOptions): Promise<TokenResult> {
+        this.check();
+        return this._consul!.acl.token.update(id, data);
+    }
     public async del_token(id: string): Promise<void> {
         this.check();
         this._consul!.acl.token.delete(id);
@@ -362,6 +397,14 @@ export default class ConsulProvider {
     public async add_role(opt: Role): Promise<void> {
         this.check();
         this._consul!.acl.role.create(opt);
+    }
+    public async read_role(id: string): Promise<Role> {
+        this.check();
+        return this._consul!.acl.role.read(id);
+    }
+    public async update_role(id: string, role: Role): Promise<Role> {
+        this.check();
+        return this._consul!.acl.role.update(id, role);
     }
     public async del_role(id: string): Promise<void> {
         this.check();
