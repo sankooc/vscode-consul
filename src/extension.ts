@@ -10,4 +10,4 @@ export function activate(context: vscode.ExtensionContext) {
     log('active complete');
 }
 
-export function deactivate() { }
+export function deactivate() {}

@@ -2,9 +2,9 @@
   "name": "vscode-consul",
   "displayName": "VSConsul",
   "description": "Consul integration for VS Code",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "engines": {
-		"vscode": "^1.86.2"
+    "vscode": "^1.86.2"
   },
   "repository": {
     "type": "git",
@@ -13,11 +13,11 @@
   "categories": [
     "Other"
   ],
-	"icon": "resources/icon128.png",
-	"keywords": [
-		"Consul",
-		"Service Discovery"
-	],
+  "icon": "resources/icon128.png",
+  "keywords": [
+    "Consul",
+    "Service Discovery"
+  ],
   "publisher": "sankooc",
   "activationEvents": [],
   "main": "./dist/extension.js",
@@ -109,6 +109,46 @@
         "command": "consul.importAllKV",
         "title": "Import All KV",
         "icon": "$(replace)"
+      },
+      {
+        "command": "consul.acl.policy.add",
+        "title": "Add Consul Policy",
+        "icon": "$(add)"
+      },
+      {
+        "command": "consul.acl.policy.del",
+        "title": "Remove Consul Policy",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "consul.acl.token.add",
+        "title": "Add Consul ACLToken",
+        "icon": "$(add)"
+      },
+      {
+        "command": "consul.acl.token.del",
+        "title": "Remove Consul ACLToken",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "consul.acl.role.add",
+        "title": "Add Role",
+        "icon": "$(add)"
+      },
+      {
+        "command": "consul.acl.role.del",
+        "title": "Delete Role",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "consul.acl.templatedPolicy.view.schema",
+        "title": "schema",
+        "icon": "$(circuit-board)"
+      },
+      {
+        "command": "consul.acl.templatedPolicy.view.template",
+        "title": "template",
+        "icon": "$(circuit-board)"
       }
     ],
     "menus": {
@@ -184,6 +224,46 @@
           "command": "consul.importAllKV",
           "when": "viewItem == kvRoot",
           "group": "navigation"
+        },
+        {
+          "command": "consul.acl.policy.add",
+          "when": "viewItem == policy_root",
+          "group": "inline"
+        },
+        {
+          "command": "consul.acl.policy.del",
+          "when": "viewItem == policy_leaf",
+          "group": "inline"
+        },
+        {
+          "command": "consul.acl.token.add",
+          "when": "viewItem == token_root",
+          "group": "inline"
+        },
+        {
+          "command": "consul.acl.token.del",
+          "when": "viewItem == token_leaf",
+          "group": "inline"
+        },
+        {
+          "command": "consul.acl.role.add",
+          "when": "viewItem == role_root",
+          "group": "inline"
+        },
+        {
+          "command": "consul.acl.role.del",
+          "when": "viewItem == role_leaf",
+          "group": "inline"
+        },
+        {
+          "command": "consul.acl.templatedPolicy.view.schema",
+          "when": "viewItem == tp_leaf",
+          "group": "navigation"
+        },
+        {
+          "command": "consul.acl.templatedPolicy.view.template",
+          "when": "viewItem == tp_leaf",
+          "group": "navigation"
         }
       ]
     }
@@ -201,21 +281,23 @@
     "check-types": "tsc --noEmit",
     "lint": "eslint src --ext ts",
     "test": "vscode-test",
+    "format": "prettier -w ./src",
     "build-webview": "esbuild media/webview/toolkit.js --bundle --outfile=media/webview/toolkit.bundle.js --format=esm --platform=browser"
   },
   "vsce": {
-		"dependencies": false,
-		"pnpm": true
-	},
+    "dependencies": false,
+    "pnpm": true
+  },
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.4.0",
-    "consul": "github:sankooc/node-consul#2.0.1-snap"
+    "consul": "file:../node-consul",
+    "handlebars": "^4.7.8"
   },
   "devDependencies": {
     "@types/consul": "^0.40.3",
     "@types/mocha": "^10.0.6",
     "@types/node": "20.x",
-		"@types/vscode": "^1.86.2",
+    "@types/vscode": "^1.86.2",
     "@typescript-eslint/eslint-plugin": "^7.11.0",
     "@typescript-eslint/parser": "^7.11.0",
     "@vscode/test-cli": "^0.0.9",
@@ -223,6 +305,7 @@
     "esbuild": "^0.21.5",
     "eslint": "^8.57.0",
     "npm-run-all": "^4.1.5",
+    "prettier": "^3.5.3",
     "typescript": "^5.4.5"
   }
 }

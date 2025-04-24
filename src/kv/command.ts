@@ -1,9 +1,10 @@
-import { KVItem, unzipData, zipData } from "../common";
-import { ConsulProvider, KVTreeItem } from "../providers/consulProvider";
-import { ConsulTreeDataProvider } from "../providers/treeDataProvider";
+import { KVItem, unzipData, zipData } from '../common';
+import ConsulProvider from '../providers/consulProvider';
+import KVTreeItem from './treeitem';
+import { ConsulTreeDataProvider } from '../providers/treeDataProvider';
 import vscode from 'vscode';
 
-export const build = (context: vscode.ExtensionContext, consulTreeProvider: ConsulTreeDataProvider): vscode.Disposable[] => {
+export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTreeDataProvider): vscode.Disposable[] => {
     class ConsulKVFileSystemProvider implements vscode.FileSystemProvider {
         private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
         private _contents = new Map<string, Uint8Array>();
@@ -12,7 +13,7 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
         readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
 
         watch(uri: vscode.Uri): vscode.Disposable {
-            return new vscode.Disposable(() => { });
+            return new vscode.Disposable(() => {});
         }
 
         stat(uri: vscode.Uri): vscode.FileStat {
@@ -20,7 +21,7 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
                 type: vscode.FileType.File,
                 ctime: Date.now(),
                 mtime: Date.now(),
-                size: this._contents.get(KVTreeItem.parseKey(uri))?.length || 0
+                size: this._contents.get(KVTreeItem.parseKey(uri))?.length || 0,
             };
         }
 
@@ -28,7 +29,7 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
             return [];
         }
 
-        createDirectory(uri: vscode.Uri): void { }
+        createDirectory(uri: vscode.Uri): void {}
 
         async readFile(uri: vscode.Uri): Promise<Uint8Array> {
             const key = KVTreeItem.parseKey(uri);
@@ -39,7 +40,7 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
             throw vscode.FileSystemError.FileNotFound(uri);
         }
 
-        async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
+        async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean }): Promise<void> {
             const key = KVTreeItem.parseKey(uri);
             const provider = this._providers.get(key);
             if (!provider) {
@@ -83,10 +84,9 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
     const kvFileSystemProvider = new ConsulKVFileSystemProvider();
     const registration = vscode.workspace.registerFileSystemProvider('consul-kv', kvFileSystemProvider, {
         isCaseSensitive: true,
-        isReadonly: false
+        isReadonly: false,
     });
     context.subscriptions.push(registration);
-
 
     const refreshKVCommand = vscode.commands.registerCommand('consul.refreshKV', (node) => {
         consulTreeProvider.refresh();
@@ -97,15 +97,17 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
         if (provider) {
             const key = await vscode.window.showInputBox({
                 prompt: 'Enter key name',
-                placeHolder: 'e.g., config/app/settings'
+                placeHolder: 'e.g., config/app/settings',
             });
             try {
                 if (key) {
+                    if (key?.startsWith('/') || key?.endsWith('/')) {
+                        vscode.window.showErrorMessage('invalid key name');
+                        return;
+                    }
                     await provider.addKV(key);
                     consulTreeProvider.persistInstances();
                     consulTreeProvider.refresh();
-                    vscode.window.showInformationMessage('Successfully added key/value pair');
-
                 }
             } catch (e) {
                 console.error(e);
@@ -116,11 +118,7 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
     });
 
     const deleteKVCommand = vscode.commands.registerCommand('consul.deleteKVPair', async (node: KVTreeItem) => {
-        const answer = await vscode.window.showWarningMessage(
-            `Are you sure you want to delete key '${node.key}'?`,
-            { modal: true },
-            'Yes'
-        );
+        const answer = await vscode.window.showWarningMessage(`Are you sure you want to delete key '${node.key}'?`, { modal: true }, 'Yes');
 
         if (answer === 'Yes' && node.provider) {
             try {
@@ -134,10 +132,9 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
         }
     });
 
-
     const exportData = vscode.commands.registerCommand('consul.exportAllKV', async (node: KVTreeItem) => {
         const saveUri = await vscode.window.showSaveDialog({
-            filters: { 'JSON Files': ['json'] }
+            filters: { 'JSON Files': ['json'] },
         });
         if (!saveUri) {
             return;
@@ -150,11 +147,11 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
             vscode.window.showInformationMessage('KV data exported successfully!');
         }
     });
-    
+
     const importData = vscode.commands.registerCommand('consul.importAllKV', async (node: KVTreeItem) => {
         const openUris = await vscode.window.showOpenDialog({
             filters: { 'JSON Files': ['json'] },
-            canSelectMany: false
+            canSelectMany: false,
         });
         if (!openUris || openUris.length === 0) {
             return;
@@ -162,7 +159,7 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
         const fileUri = openUris[0];
         const fileData = await vscode.workspace.fs.readFile(fileUri);
         const items: KVItem[] = unzipData(fileData);
-        if(!items || !items.length){
+        if (!items || !items.length) {
             vscode.window.showErrorMessage('archive format is invalid');
         } else {
             await node.provider?.saveKVs(items);
@@ -179,9 +176,7 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
 
         try {
             const uri = node.buildURI();
-            const existingEditors = vscode.window.visibleTextEditors.filter(
-                editor => editor.document.uri.toString() === uri.toString()
-            );
+            const existingEditors = vscode.window.visibleTextEditors.filter((editor) => editor.document.uri.toString() === uri.toString());
 
             if (existingEditors.length > 0) {
                 await vscode.window.showTextDocument(existingEditors[0].document);
@@ -192,7 +187,6 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
             await kvFileSystemProvider.setInitialContent(node.key, value || '', node.provider);
             const document = await vscode.workspace.openTextDocument(uri);
             await vscode.window.showTextDocument(document);
-
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to open KV editor: ${error}`);
         }

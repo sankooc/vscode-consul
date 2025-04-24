@@ -1,28 +1,38 @@
 import * as vscode from 'vscode';
-import { ConsulProvider, KVTreeItem, CatalogTreeItem, ConsulInstanceTreeItem } from './consulProvider';
 import { ConsulOptions } from 'consul/lib/consul';
+import ConsulProvider from './consulProvider';
+import KVTreeItem from '../kv/treeitem';
+import ConsulInstanceTreeItem from '../instance/treeitem';
+import ACLTreeItem from '../acl/treeitem';
+import PolicyTreeItem from '../acl/policy/treeitem';
+import CatalogTreeItem from '../catelog/treeitem';
+import Viewer from '../view';
 
 interface ConsulInstanceInfo {
     label: string;
     config: ConsulOptions | null;
 }
 
-export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulInstanceTreeItem | KVTreeItem | CatalogTreeItem> {
+export type ConsulTreeItem = ConsulInstanceTreeItem | KVTreeItem | CatalogTreeItem | ACLTreeItem | PolicyTreeItem;
+
+export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulTreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<void | ConsulInstanceTreeItem | null> = new vscode.EventEmitter<void | ConsulInstanceTreeItem | null>();
     readonly onDidChangeTreeData: vscode.Event<void | ConsulInstanceTreeItem | null> = this._onDidChangeTreeData.event;
     private consulInstances: Map<string, ConsulProvider> = new Map();
+    public readonly view: Viewer;
 
     constructor(private context: vscode.ExtensionContext) {
         this.loadPersistedInstances();
+        this.view = new Viewer(context);
     }
 
     private loadPersistedInstances() {
         const instances = this.context.globalState.get<ConsulInstanceInfo[]>('consulInstances', []);
-        instances.forEach(instance => {
+        instances.forEach((instance) => {
             const { label, config } = instance;
             const provider = new ConsulProvider(label);
             this.consulInstances.set(label, provider);
-            if(config){
+            if (config) {
                 provider.setConfig(config);
             }
         });
@@ -32,44 +42,35 @@ export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulIns
     public async persistInstances() {
         const instances: ConsulInstanceInfo[] = Array.from(this.consulInstances.entries()).map(([label, provider]) => ({
             label,
-            config: provider.getConfig()
+            config: provider.getConfig(),
         }));
         await this.context.globalState.update('consulInstances', instances);
     }
 
-    getTreeItem(element: ConsulInstanceTreeItem | KVTreeItem | CatalogTreeItem): vscode.TreeItem {
+    public getProvider(label: string): ConsulProvider | undefined {
+        return this.consulInstances.get(label);
+    }
+
+    public getActiveProvider(label: string): ConsulProvider {
+        const provider = this.consulInstances.get(label);
+        if (!provider) {
+            throw new Error(`Consul instance ${label} not found`);
+        }
+        return provider;
+    }
+
+    getTreeItem(element: ConsulTreeItem): vscode.TreeItem {
         return element;
     }
 
-    async getChildren(element?: ConsulInstanceTreeItem | KVTreeItem | CatalogTreeItem): Promise<(ConsulInstanceTreeItem | KVTreeItem | CatalogTreeItem)[]> {
+    async getChildren(element?: ConsulTreeItem): Promise<ConsulTreeItem[]> {
         if (!element) {
-            return Array.from(this.consulInstances.entries()).map(([label, provider]) => 
-                provider.createTreeItem(provider.isConnected?vscode.TreeItemCollapsibleState.Collapsed: vscode.TreeItemCollapsibleState.None )
+            return Array.from(this.consulInstances.entries()).map(([label, provider]) =>
+                provider.createTreeItem(provider.isConnected ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None)
             );
         }
 
-        if (element instanceof ConsulInstanceTreeItem) {
-            if (!element.isConnected) {
-                return [];
-            }
-            return [
-                KVTreeItem.rootItem(element.provider),
-                CatalogTreeItem.rootItem(element.provider),
-            ];
-        }
-
-        if (element instanceof KVTreeItem && element.contextValue === 'kvRoot') {
-            const provider = element.provider;
-            return provider && provider.isConnected ? provider.getKVTree() : [];
-        }
-
-        if (element instanceof KVTreeItem) {
-            return element.children || [];
-        }
-        if (element instanceof CatalogTreeItem) {
-            return element.getChildren();
-        }
-        return [];
+        return await element.getChildren();
     }
 
     async addConsulInstance(label: string) {

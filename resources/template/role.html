@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module" src="{{host}}/media/webview/toolkit.bundle.js"></script>
+    <style>
+        body {
+            padding: 20px;
+        }
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: none;
+        }
+        .form-group {
+            margin-bottom: 24px;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .form-group:hover {
+            background-color: var(--vscode-list-hoverBackground);
+        }
+        .form-group>* {
+            width: 100%;
+        }
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--vscode-foreground);
+        }
+        .form-description {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--vscode-descriptionForeground);
+            font-size: 0.9em;
+        }
+        .form-control {
+            margin-top: 8px;
+        }
+        .form-control>* {
+            width: 100%;
+            display: block;
+        }
+        vscode-text-field,
+        vscode-text-area,
+        vscode-dropdown {
+            width: 100%;
+            display: block;
+        }
+        vscode-checkbox {
+            width: 100%;
+            display: block;
+            padding: 4px 0;
+        }
+        .optional-label {
+            color: var(--vscode-descriptionForeground);
+            font-size: 0.9em;
+            font-weight: normal;
+        }
+        .policy-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .policy-tag {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--vscode-badge-background);
+            color: var(--vscode-badge-foreground);
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .policy-tag vscode-button {
+            padding: 2px;
+            min-width: 16px;
+            height: 16px;
+        }
+        .button-container {
+            display: flex;
+            gap: 8px;
+            margin-top: 24px;
+        }
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .loading vscode-progress-ring {
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <vscode-progress-ring></vscode-progress-ring>
+        <div>Loading components...</div>
+    </div>
+    <div class="form-container" id="formContainer">
+        <form id="roleForm">
+            <div class="form-group">
+                <div class="form-label">Name *</div>
+                <div class="form-description">A unique name for this role. This cannot be changed after creation.</div>
+                <div class="form-control">
+                    <vscode-text-field id="name" required></vscode-text-field>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-label">Description</div>
+                <div class="form-description">A human-readable description of the role's purpose.</div>
+                <div class="form-control">
+                    <vscode-text-area id="description" rows="3"></vscode-text-area>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-label">Policies <span class="optional-label">(optional)</span></div>
+                <div class="form-description">Select policies to attach to this role.</div>
+                <div class="form-control">
+                    <vscode-dropdown id="policySelector">
+                        <vscode-option value="">Select a policy to add...</vscode-option>
+                        {{#each policies}}
+                        <vscode-option value="{{Name}}">{{Name}}</vscode-option>
+                        {{/each}}
+                    </vscode-dropdown>
+                    <div class="policy-tags" id="policyTags"></div>
+                </div>
+            </div>
+            <div class="button-container">
+                <vscode-button appearance="primary" id="saveButton">Save</vscode-button>
+                <vscode-button appearance="secondary" id="cancelButton">Cancel</vscode-button>
+            </div>
+        </form>
+    </div>
+    <script>
+        const vscode = acquireVsCodeApi();
+        const selectedPolicies = new Set();
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('formContainer').style.display = 'block';
+            }, 100);
+        });
+        function updatePolicyTags() {
+            const container = document.getElementById('policyTags');
+            container.innerHTML = '';
+            selectedPolicies.forEach(policy => {
+                const tag = document.createElement('div');
+                tag.className = 'policy-tag';
+                tag.innerHTML = `
+                    <span>${policy}</span>
+                    <vscode-button appearance="icon" id="remove-${policy}">×</vscode-button>
+                `;
+                container.appendChild(tag);
+                document.getElementById(`remove-${policy}`).addEventListener('click', () => {
+                    selectedPolicies.delete(policy);
+                    updatePolicyTags();
+                });
+            });
+        }
+        // Policy selector
+        document.getElementById('policySelector').addEventListener('change', (e) => {
+            const value = e.target.value;
+            if (value && !selectedPolicies.has(value)) {
+                selectedPolicies.add(value);
+                updatePolicyTags();
+                e.target.value = '';
+            }
+        });
+        // Save button
+        document.getElementById('saveButton').addEventListener('click', (e) => {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById('name').value,
+                description: document.getElementById('description').value,
+                policies: Array.from(selectedPolicies).map(name => ({ Name: name }))
+            };
+            vscode.postMessage({
+                command: 'save',
+                data: formData
+            });
+        });
+        // Cancel button
+        document.getElementById('cancelButton').addEventListener('click', () => {
+            vscode.postMessage({
+                command: 'cancel'
+            });
+        });
+    </script>
+</body>
+</html>
