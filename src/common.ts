@@ -234,3 +234,10 @@ export const buildRawDataURI = (name: string, type: string, data: string): vscod
     });
     // return vscode.Uri.parse(`${RAW_DATA_SCHEMA}:/${name}?type=${type}&data=${encodeURIComponent(data)}`).with({ scheme: RAW_DATA_SCHEMA });
 };
+
+export const anyToString = (value: any): string => {
+    if (typeof value === 'object') {
+        return JSON.stringify(value);
+    }
+    return String(value);
+};

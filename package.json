@@ -102,53 +102,63 @@
       },
       {
         "command": "consul.exportAllKV",
-        "title": "Export All KV",
+        "title": "%consul.exportAllKV.title%",
         "icon": "$(clone)"
       },
       {
         "command": "consul.importAllKV",
-        "title": "Import All KV",
+        "title": "%consul.importAllKV.title%",
         "icon": "$(replace)"
       },
       {
         "command": "consul.acl.policy.add",
-        "title": "Add Consul Policy",
+        "title": "%consul.acl.policy.add.title%",
         "icon": "$(add)"
       },
       {
         "command": "consul.acl.policy.del",
-        "title": "Remove Consul Policy",
+        "title": "%consul.acl.policy.del.title%",
         "icon": "$(trash)"
       },
       {
         "command": "consul.acl.token.add",
-        "title": "Add Consul ACLToken",
+        "title": "%consul.acl.token.add.title%",
         "icon": "$(add)"
       },
       {
         "command": "consul.acl.token.del",
-        "title": "Remove Consul ACLToken",
+        "title": "%consul.acl.token.del.title%",
         "icon": "$(trash)"
       },
       {
         "command": "consul.acl.role.add",
-        "title": "Add Role",
+        "title": "%consul.acl.role.add.title%",
         "icon": "$(add)"
       },
       {
         "command": "consul.acl.role.del",
-        "title": "Delete Role",
+        "title": "%consul.acl.role.del.title%",
         "icon": "$(trash)"
       },
       {
         "command": "consul.acl.templatedPolicy.view.schema",
-        "title": "schema",
+        "title": "%consul.acl.templatedPolicy.view.schema.title%",
         "icon": "$(circuit-board)"
       },
       {
         "command": "consul.acl.templatedPolicy.view.template",
-        "title": "template",
+        "title": "%consul.acl.templatedPolicy.view.template.title%",
         "icon": "$(circuit-board)"
+      },
+      {
+        "command": "consul.snapshot",
+        "title": "%consul.snapshot%",
+        "icon": "$(save)"
+      },
+      {
+        "command": "consul.restore",
+        "title": "%consul.restore%",
+        "icon": "$(sync)"
       }
     ],
     "menus": {
@@ -167,7 +177,7 @@
       "view/item/context": [
         {
           "command": "consul.removeInstance",
-          "when": "viewItem == consulInstanceConnected || viewItem == consulInstanceDisconnected",
+          "when": "viewItem == consulInstanceDisconnected",
           "group": "inline"
         },
         {
@@ -177,6 +187,21 @@
         },
         {
           "command": "consul.disconnect",
+          "when": "viewItem == consulInstanceConnected",
+          "group": "inline"
+        },
+        {
+          "command": "consul.configureInstance",
+          "when": "viewItem == consulInstanceDisconnected",
+          "group": "inline"
+        },
+        {
+          "command": "consul.snapshot",
+          "when": "viewItem == consulInstanceConnected",
+          "group": "inline"
+        },
+        {
+          "command": "consul.restore",
           "when": "viewItem == consulInstanceConnected",
           "group": "inline"
         },
@@ -198,11 +223,6 @@
         {
           "command": "consul.refreshKV",
           "when": "viewItem == kvRoot",
-          "group": "inline"
-        },
-        {
-          "command": "consul.configureInstance",
-          "when": "view == consulInstances && viewItem == consulInstanceDisconnected",
           "group": "inline"
         },
         {
