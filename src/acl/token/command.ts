@@ -1,4 +1,3 @@
-import { PolicyResult } from 'consul/lib/acl/policy';
 import { ConsulTreeDataProvider } from '../../providers/treeDataProvider';
 import LoclTreeItem from './treeitem';
 import vscode from 'vscode';
@@ -39,6 +38,11 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
 
     const del = vscode.commands.registerCommand('consul.acl.token.del', async (item: LoclTreeItem) => {
         try {
+            const answer = await vscode.window.showWarningMessage(vscode.l10n.t('Are you sure you want to delete this token {0} ?', item.label), { modal: true }, 'Yes');
+
+            if (answer !== 'Yes') {
+                return;
+            }
             const id = item.key;
             if (id) {
                 await item.provider?.del_token(id);

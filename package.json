@@ -198,12 +198,12 @@
         {
           "command": "consul.snapshot",
           "when": "viewItem == consulInstanceConnected",
-          "group": "inline"
+          "group": "navigation"
         },
         {
           "command": "consul.restore",
           "when": "viewItem == consulInstanceConnected",
-          "group": "inline"
+          "group": "navigation"
         },
         {
           "command": "consul.addKV",

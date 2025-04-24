@@ -38,6 +38,11 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
 
     const del = vscode.commands.registerCommand('consul.acl.role.del', async (item: LoclTreeItem) => {
         try {
+            const answer = await vscode.window.showWarningMessage(vscode.l10n.t('Are you sure you want to delete this role {0} ?', item.label), { modal: true }, 'Yes');
+
+            if (answer !== 'Yes') {
+                return;
+            }
             const id = item.key;
             if (id) {
                 await item.provider?.del_role(id);
