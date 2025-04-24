@@ -19,6 +19,10 @@ class CTreeItem extends BasicTreeItem {
             case CTreeItem.ROOT:
                 this.iconPath = new vscode.ThemeIcon('organization');
                 break;
+            case CTreeItem.LEAF:
+                this.iconPath = new vscode.ThemeIcon('preview');
+                this.description = this.key;
+                break;
             default:
                 this.iconPath = new vscode.ThemeIcon('preview');
         }
@@ -26,7 +30,14 @@ class CTreeItem extends BasicTreeItem {
     async getChildren(): Promise<ConsulTreeItem[]> {
         switch (this.contextValue) {
             case CTreeItem.ROOT:
-                return [];
+                const roles = await this.provider?.list_role() || [];
+                return roles.map(role => new CTreeItem(
+                    role.Name,
+                    role.ID!,
+                    vscode.TreeItemCollapsibleState.None,
+                    CTreeItem.LEAF,
+                    this.provider
+                ));
             default:
                 return [];
         }

@@ -3,7 +3,7 @@ import vscode from 'vscode';
 import { ConsulTreeDataProvider, ConsulTreeItem } from './providers/treeDataProvider';
 import ConsulProvider from './providers/consulProvider';
 
-export const log = function(...args: any){
+export const log = function (...args: any) {
     console.log(...args);
 };
 
@@ -68,15 +68,15 @@ export interface KVItem {
 //         zip: (items: KVItem[]) => ({ meta: 'kv', version: '1.0', items}),
 //     }
 // }
-export const zipData = function(items: KVItem[]): Buffer {
-    const jsonData = JSON.stringify({ meta: 'kv', version: '1.0', items});
+export const zipData = function (items: KVItem[]): Buffer {
+    const jsonData = JSON.stringify({ meta: 'kv', version: '1.0', items });
     return Buffer.from(jsonData, 'utf8');
 };
 
-export const unzipData = function(buf: Uint8Array): KVItem[] {
+export const unzipData = function (buf: Uint8Array): KVItem[] {
     const rs = JSON.parse(buf.toString());
     const { meta, version } = rs;
-    if(meta !== 'kv'){
+    if (meta !== 'kv') {
         return [];
     }
     const items: KVItem[] = rs.items;
@@ -85,7 +85,7 @@ export const unzipData = function(buf: Uint8Array): KVItem[] {
 
 
 export class BasicTreeItem extends vscode.TreeItem {
-    constructor(label: string, collapsibleState: vscode.TreeItemCollapsibleState){
+    constructor(label: string, collapsibleState: vscode.TreeItemCollapsibleState) {
         super(label, collapsibleState);
     }
     async getChildren(): Promise<ConsulTreeItem[]> {
@@ -110,11 +110,11 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
     async _read(provider: ConsulProvider, id: string): Promise<[string, T]> {
         throw new Error('Method not implemented.');
     }
-    async content(uri: vscode.Uri): Promise<string>{
+    async content(uri: vscode.Uri): Promise<string> {
         const _path = uri.path;
         const [_, label, key] = _path.split('/');
         const provider = this.cProvider.getActiveProvider(label);
-        if(provider) {
+        if (provider) {
             const [_text, cache] = await this._read(provider, key);
             this.content_map.set(_path, cache);
             return _text;
@@ -124,14 +124,14 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
     stat(uri: vscode.Uri): vscode.FileStat {
         const _path = uri.path;
         const stat = this.content_map.get(_path);
-        const def =  {
+        const def = {
             type: vscode.FileType.File,
             ctime: Date.now(),
             mtime: Date.now(),
             size: 0,
         };
-        if(stat) {
-            return {...def, ...stat};
+        if (stat) {
+            return { ...def, ...stat };
         }
         return def;
     }
@@ -152,13 +152,13 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
         const cache = this.content_map.get(_path);
         const [_, label, id] = _path.split('/');
         const provider = this.cProvider.getActiveProvider(label);
-        if(provider && cache) {
+        if (provider && cache) {
             const value = new TextDecoder().decode(content);
             await this._update(provider, id, value, cache);
         }
     }
 
-    async _update(provider: ConsulProvider, id: string, value: string, cache: T ): Promise<boolean> {
+    async _update(provider: ConsulProvider, id: string, value: string, cache: T): Promise<boolean> {
         return false;
     }
 
@@ -166,9 +166,9 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
         const _path = uri.path;
         const [_, label, id] = _path.split('/');
         const provider = this.cProvider.getActiveProvider(label);
-        if(provider) {
+        if (provider) {
             this._delete(provider, id).then((result) => {
-                if(result) {
+                if (result) {
                     this.content_map.delete(_path);
                     this._emitter.fire([{
                         type: vscode.FileChangeType.Deleted,
@@ -196,10 +196,45 @@ export const upperObj = (opt: any): any => {
     const rs: { [key: string]: any } = {};
     for (const key of Object.keys(opt)) {
         const value = opt[key];
-        if(value !== '' && value !== null && value !== undefined){
+        if (value !== '' && value !== null && value !== undefined) {
             const upperKey = key.charAt(0).toUpperCase() + key.slice(1);
             rs[upperKey] = value;
         }
     }
     return rs;
+};
+
+
+export const RAW_DATA_SCHEMA = 'raw-data';
+
+export function parseQuery(queryString: string): string {
+    if (!queryString) return '';
+    const params: Record<string, string> = {};
+    try {
+        const pairs = queryString.split('&');
+        for (const pair of pairs) {
+            const [key, value] = pair.split('=');
+            if (key && value) {
+                params[decodeURIComponent(key)] = decodeURIComponent(value);
+            }
+        }
+        switch (params.type) {
+            case 'json':
+                return JSON.stringify(JSON.parse(params.data), null, 2);
+            default:
+                return params.data || '';
+        }
+    } catch (e) {
+        console.error(e);
+    }
+    return params.data || '';
+}
+
+export const buildRawDataURI = (name: string, type: string, data: string): vscode.Uri => {
+    return vscode.Uri.from({
+        scheme: RAW_DATA_SCHEMA,
+        path: `/${name}`,
+        query: `type=${encodeURIComponent(type)}&data=${encodeURIComponent(data)}`
+    });
+    // return vscode.Uri.parse(`${RAW_DATA_SCHEMA}:/${name}?type=${type}&data=${encodeURIComponent(data)}`).with({ scheme: RAW_DATA_SCHEMA });
 };

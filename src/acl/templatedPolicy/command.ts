@@ -1,13 +1,33 @@
+import { buildRawDataURI } from "../../common";
 import { ConsulTreeDataProvider } from "../../providers/treeDataProvider";
 import LoclTreeItem from './treeitem';
 import vscode from 'vscode';
 
+
 export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvider): vscode.Disposable[] => {
-    const namecheck = (name: string | undefined) => {
-        return !!name;
-    };
-    const prompt = 'Enter a name for the ACL Templated Policy';
-    return [];
+    const schema = vscode.commands.registerCommand('consul.acl.templatedPolicy.view.schema', async (item: LoclTreeItem) => {
+        if (item.item) {
+            const data = item.item;
+            const _text = data.Schema;
+            if (_text) {
+                const uri = buildRawDataURI(`${data.TemplateName}-schema`, 'json', _text);
+                const doc = await vscode.workspace.openTextDocument(uri);
+                await vscode.window.showTextDocument(doc);
+            }
+        }
+    });
+    const template = vscode.commands.registerCommand('consul.acl.templatedPolicy.view.template', async (item: LoclTreeItem) => {
+        if (item.item) {
+            const data = item.item;
+            const _text = data.Template;
+            if (_text) {
+                const uri = buildRawDataURI(`${data.TemplateName}-temp`, 'plain', _text);
+                const doc = await vscode.workspace.openTextDocument(uri);
+                await vscode.window.showTextDocument(doc);
+            }
+        }
+    })
+    return [schema, template];
 
     // const add = vscode.commands.registerCommand('consul.acl.templatedPolicy.add', async (item: LoclTreeItem) => {
     //     const name = await vscode.window.showInputBox({ prompt });

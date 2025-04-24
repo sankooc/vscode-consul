@@ -129,6 +129,26 @@
         "command": "consul.acl.token.del",
         "title": "Remove Consul ACLToken",
         "icon": "$(trash)"
+      },
+      {
+        "command": "consul.acl.role.add",
+        "title": "Add Role",
+        "icon": "$(add)"
+      },
+      {
+        "command": "consul.acl.role.del",
+        "title": "Delete Role",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "consul.acl.templatedPolicy.view.schema",
+        "title": "schema",
+        "icon": "$(circuit-board)"
+      },
+      {
+        "command": "consul.acl.templatedPolicy.view.template",
+        "title": "template",
+        "icon": "$(circuit-board)"
       }
     ],
     "menus": {
@@ -224,6 +244,26 @@
           "command": "consul.acl.token.del",
           "when": "viewItem == token_leaf",
           "group": "inline"
+        },
+        {
+          "command": "consul.acl.role.add",
+          "when": "viewItem == role_root",
+          "group": "inline"
+        },
+        {
+          "command": "consul.acl.role.del",
+          "when": "viewItem == role_leaf",
+          "group": "inline"
+        },
+        {
+          "command": "consul.acl.templatedPolicy.view.schema",
+          "when": "viewItem == tp_leaf",
+          "group": "navigation"
+        },
+        {
+          "command": "consul.acl.templatedPolicy.view.template",
+          "when": "viewItem == tp_leaf",
+          "group": "navigation"
         }
       ]
     }
