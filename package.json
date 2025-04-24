@@ -309,9 +309,10 @@
     "pnpm": true
   },
   "dependencies": {
-    "@vscode/webview-ui-toolkit": "^1.4.0",
     "consul": "file:../node-consul",
-    "handlebars": "^4.7.8"
+    "handlebars": "^4.7.8",
+    "hcl-to-json": "^0.1.1",
+    "hcl2-parser": "^1.0.3"
   },
   "devDependencies": {
     "@types/consul": "^0.40.3",
@@ -322,6 +323,7 @@
     "@typescript-eslint/parser": "^7.11.0",
     "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^2.4.0",
+    "@vscode/webview-ui-toolkit": "^1.4.0",
     "esbuild": ">=0.25.0",
     "eslint": "^8.57.0",
     "npm-run-all": "^4.1.5",

@@ -11,6 +11,8 @@ import { PolicyCreateOption, PolicyResult } from 'consul/lib/acl/policy';
 import { TokenResult } from 'consul/lib/acl/token';
 import { Role } from 'consul/lib/acl/role';
 import { TemplatedPolicy } from 'consul/lib/acl/templatedPolicy';
+import * as parser from 'hcl2-parser';
+// import htj from 'hcl-to-json';
 
 export default class ConsulProvider {
     private _consul: Consul | undefined;
@@ -22,7 +24,9 @@ export default class ConsulProvider {
     private cfg: ConsulOptions | undefined;
     private _isConnected: boolean = false;
 
-    private _instance: any | undefined;
+    // private _instance: any | undefined;
+    private token?: TokenResult;
+    private rules: string[] = [];
     constructor(private label: string) {}
 
     public get isConnected(): boolean {
@@ -52,20 +56,91 @@ export default class ConsulProvider {
         return 'unkown';
     }
 
+    public checkPermission(acl: string): boolean {
+        if (!this.rules || this.rules.length === 0) {
+            return false;
+        }
+
+        const [resource, operation] = acl.split(':');
+        if (!resource || !operation) {
+            return false;
+        }
+
+        // Check each policy rule
+        for (const rule of this.rules) {
+            try {
+                // const parsed = parse(rule);
+                
+                // // Check operator policy (full access)
+                // if (parsed.operator === 'write') {
+                //     return true;
+                // }
+
+                // // Check key permissions
+                // if (resource === 'key' && parsed.key) {
+                //     for (const [path, permissions] of Object.entries(parsed.key)) {
+                //         // Check if the permission matches
+                //         if (permissions[operation] === 'allow') {
+                //             return true;
+                //         }
+                //     }
+                // }
+
+                // // Check service permissions
+                // if (resource === 'service' && parsed.service) {
+                //     for (const [serviceName, permissions] of Object.entries(parsed.service)) {
+                //         if (permissions[operation] === 'allow') {
+                //             return true;
+                //         }
+                //     }
+                // }
+
+                // // Check node permissions
+                // if (resource === 'node' && parsed.node) {
+                //     for (const [nodeName, permissions] of Object.entries(parsed.node)) {
+                //         if (permissions[operation] === 'allow') {
+                //             return true;
+                //         }
+                //     }
+                // }
+
+            } catch (error) {
+                console.error('Failed to parse HCL rule:', error);
+                continue;
+            }
+        }
+
+        return false;
+    }
+
     public async connect(): Promise<void> {
         if (!this.cfg) {
             throw new Error('no consul config');
         }
         try {
             this._consul = new Consul(this.cfg);
-            const sf = await this._consul.agent.self();
-            if (sf?.Config?.NodeName) {
-                //todo ??
-                this._instance = sf.Config;
-                this._isConnected = true;
-            } else {
-                vscode.window.showErrorMessage('connect failed');
+            const token = await this._consul.acl.token.readSelf();
+            const { Policies } = token;
+            for(const p of Policies) {
+                const { ID } = p;
+                const { Rules } = await this._consul.acl.policy.read(ID);
+                if(Rules){
+                    const rs = parser.parse(Rules);
+                    this.rules.push(Rules);
+                }
             }
+            this.token = token;
+            this._isConnected = true;
+
+            // this._consul.acl.policy.read();
+            // const sf = await this._consul.agent.self();
+            // if (sf?.Config?.NodeName) {
+            //     //todo ??
+            //     // this._instance = sf.Config;
+            //     this._isConnected = true;
+            // } else {
+            //     vscode.window.showErrorMessage('connect failed');
+            // }
         } catch (error) {
             this._isConnected = false;
             throw error;
