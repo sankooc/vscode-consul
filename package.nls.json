@@ -1,0 +1,14 @@
+{
+    "consul.addInstance.title": "Add Consul Instance",
+    "consul.removeInstance.title": "Remove Consul Instance",
+    "consul.connect.title": "Connect",
+    "consul.disconnect.title": "Disconnect",
+    "consul.refresh.title": "Refresh",
+    "consul.refreshKV.title": "Refresh KV",
+    "consul.addKV.title": "Add Key/Value",
+    "consul.editKV.title": "Edit Value",
+    "consul.deleteKV.title": "Delete Key",
+    "consul.configureInstance.title": "Configure Consul Instance",
+    "consul.deleteKVPair.title": "Delete KV Pair",
+    "consul.service.view.title": "Detail"
+}

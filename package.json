@@ -42,63 +42,63 @@
     "commands": [
       {
         "command": "consul.addInstance",
-        "title": "Add Consul Instance",
+        "title": "%consul.addInstance.title%",
         "icon": "$(add)"
       },
       {
         "command": "consul.removeInstance",
-        "title": "Remove Consul Instance",
+        "title": "%consul.removeInstance.title%",
         "icon": "$(trash)"
       },
       {
         "command": "consul.connect",
-        "title": "Connect",
+        "title": "%consul.connect.title%",
         "icon": "$(plug)"
       },
       {
         "command": "consul.disconnect",
-        "title": "Disconnect",
+        "title": "%consul.disconnect.title%",
         "icon": "$(debug-disconnect)"
       },
       {
         "command": "consul.refresh",
-        "title": "Refresh",
+        "title": "%consul.refresh.title%",
         "icon": "$(refresh)"
       },
       {
         "command": "consul.refreshKV",
-        "title": "Refresh KV",
+        "title": "%consul.refreshKV.title%",
         "icon": "$(refresh)"
       },
       {
         "command": "consul.addKV",
-        "title": "Add Key/Value",
+        "title": "%consul.addKV.title%",
         "icon": "$(add)"
       },
       {
         "command": "consul.editKV",
-        "title": "Edit Value",
+        "title": "%consul.editKV.title%",
         "icon": "$(edit)"
       },
       {
         "command": "consul.deleteKV",
-        "title": "Delete Key",
+        "title": "%consul.deleteKV.title%",
         "icon": "$(trash)"
       },
       {
         "command": "consul.configureInstance",
-        "title": "Configure Consul Instance",
+        "title": "%consul.configureInstance.title%",
         "icon": "$(gear)"
       },
       {
         "command": "consul.deleteKVPair",
-        "title": "Delete KV Pair",
+        "title": "%consul.deleteKVPair.title%",
         "icon": "$(trash)"
       },
       {
         "command": "consul.service.view",
         "icon": "$(bracket)",
-        "title": "detail"
+        "title": "%consul.service.view.title%"
       },
       {
         "command": "consul.exportAllKV",
@@ -302,7 +302,7 @@
     "@typescript-eslint/parser": "^7.11.0",
     "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^2.4.0",
-    "esbuild": "^0.21.5",
+    "esbuild": ">=0.25.0",
     "eslint": "^8.57.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.5.3",

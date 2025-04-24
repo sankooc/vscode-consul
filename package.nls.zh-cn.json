@@ -1,0 +1,14 @@
+{
+    "consul.addInstance.title": "添加 Consul 实例",
+    "consul.removeInstance.title": "移除 Consul 实例",
+    "consul.connect.title": "连接",
+    "consul.disconnect.title": "断开连接",
+    "consul.refresh.title": "刷新",
+    "consul.refreshKV.title": "刷新 KV",
+    "consul.addKV.title": "添加键值对",
+    "consul.editKV.title": "编辑值",
+    "consul.deleteKV.title": "删除键",
+    "consul.configureInstance.title": "配置 Consul 实例",
+    "consul.deleteKVPair.title": "删除键值对",
+    "consul.service.view.title": "详情"
+}
