@@ -3,7 +3,7 @@ import LoclTreeItem from './treeitem';
 import vscode from 'vscode';
 import { RegisterOptions } from 'consul/lib/agent/service';
 import ConsulProvider from '../../providers/consulProvider';
-
+import { buildRawDataURI } from '../../common';
 
 const handleMessage = async (panel: vscode.WebviewPanel, message: { command: string; data: any }, provider: ConsulProvider) => {
     switch (message.command) {
@@ -17,12 +17,14 @@ const handleMessage = async (panel: vscode.WebviewPanel, message: { command: str
                     address: data.address,
                     port: parseInt(data.port),
                     meta: data.meta ? JSON.parse(data.meta) : undefined,
-                    check: data.check ? {
-                        name: data.check.name,
-                        http: data.check.http,
-                        interval: data.check.interval,
-                        timeout: data.check.timeout
-                    } : undefined
+                    check: data.check
+                        ? {
+                              name: data.check.name,
+                              http: data.check.http,
+                              interval: data.check.interval,
+                              timeout: data.check.timeout,
+                          }
+                        : undefined,
                 };
                 await provider.agent?.registerService(opt);
                 vscode.window.showInformationMessage('Successfully registered service');
@@ -39,23 +41,33 @@ const handleMessage = async (panel: vscode.WebviewPanel, message: { command: str
 };
 
 export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvider): vscode.Disposable[] => {
-
-    
     const register = vscode.commands.registerCommand('consul.service.register', async (item: LoclTreeItem) => {
         // const provider = item.provider;
-        if(item.provider){
+        if (item.provider) {
             const opt = {
                 viewType: 'service-register',
                 title: 'Register Service',
                 key: 'register',
                 template: 'service',
                 handleMessage: (panel: vscode.WebviewPanel, message: any) => handleMessage(panel, message, item.provider!),
-                data: {}
+                data: {},
             };
             provider.view.render(opt);
-
         }
     });
 
-    return [register];
+    const view = vscode.commands.registerCommand('consul.agent.service.view', async (item: LoclTreeItem) => {
+        const id = item.key;
+        const provider = item.provider;
+        if (id && provider) {
+            const content = await provider.agent!.serviceConfig(id);
+            if (content) {
+                const uri = buildRawDataURI(`service-${id}`, 'json', JSON.stringify(content));
+                const doc = await vscode.workspace.openTextDocument(uri);
+                await vscode.window.showTextDocument(doc);
+            }
+        }
+    });
+
+    return [register, view];
 };

@@ -20,7 +20,12 @@ export default class CTreeItem extends CommonTreeItem<ServiceInfo> {
         }
     }
     getCommandArgs(): string[] | undefined {
-        return ['service config', ''];
+        switch (this.node) {
+            case NodeType.LEAF:
+                return ['service config', 'consul.agent.service.view'];
+            default:
+                return undefined;
+        }
     }
     child(item: ServiceInfo): CommonTreeItem<ServiceInfo> {
         const it = new CTreeItem(item.Service, item.ID, vscode.TreeItemCollapsibleState.None, NodeType.LEAF, this.provider);
@@ -29,5 +34,4 @@ export default class CTreeItem extends CommonTreeItem<ServiceInfo> {
     async children(): Promise<ServiceInfo[]> {
         return await this.provider!.agent!.listService();
     }
-
 }

@@ -4,7 +4,13 @@ import vscode from 'vscode';
 import agentCommand from './service/command';
 
 export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTreeDataProvider): vscode.Disposable[] => {
-    // const edit = vscode.commands.registerCommand('consul.service.view', async (item: CatalogTreeItem) => {
+    // const view = vscode.commands.registerCommand('consul.service.view', async (item: LocTreeItem) => {
+    //     const id = item.key;
+    //     const provider = item.provider;
+    //     if(id && provider){
+    //         const content = provider.agent?.serviceConfig(id);
+
+    //     }
     // });
     return [...agentCommand(context, consulTreeProvider)];
 };

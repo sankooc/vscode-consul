@@ -95,10 +95,10 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
 
     readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
 
-    constructor(protected cProvider: ConsulTreeDataProvider) { }
+    constructor(protected cProvider: ConsulTreeDataProvider) {}
 
     watch(uri: vscode.Uri): vscode.Disposable {
-        return new vscode.Disposable(() => { });
+        return new vscode.Disposable(() => {});
     }
 
     async _read(provider: ConsulProvider, id: string): Promise<[string, T]> {
@@ -134,7 +134,7 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
         return [];
     }
 
-    createDirectory(uri: vscode.Uri): void { }
+    createDirectory(uri: vscode.Uri): void {}
 
     async readFile(uri: vscode.Uri): Promise<Uint8Array> {
         const _content = await this.content(uri);
@@ -183,7 +183,7 @@ export class ConsulFileSystemProvider<T> implements vscode.FileSystemProvider {
         return false;
     }
 
-    rename(oldUri: vscode.Uri, newUri: vscode.Uri): void { }
+    rename(oldUri: vscode.Uri, newUri: vscode.Uri): void {}
 }
 
 export const upperObj = (opt: any): any => {
@@ -242,18 +242,15 @@ export const anyToString = (value: any): string => {
     return String(value);
 };
 
-
 export const loc = (label: string): string => {
     // TODO Localize
     return label;
 };
 
-
-
 export enum NodeType {
-    ROOT = "ROOT",
-    LEAF = "LEAF",
-    LEAF_BUILDIN = "LEAF_BUILDIN",
+    ROOT = 'ROOT',
+    LEAF = 'LEAF',
+    LEAF_BUILDIN = 'LEAF_BUILDIN',
 }
 export class CommonTreeItem<T> extends vscode.TreeItem {
     constructor(
@@ -268,7 +265,6 @@ export class CommonTreeItem<T> extends vscode.TreeItem {
         this.contextValue = this.getContextValue(this.node);
         this.iconPath = new vscode.ThemeIcon(this.getIconId(this.node));
         this.command = this.getCommand();
-        
     }
     getIconId(node: NodeType): string {
         return 'globe';
@@ -276,7 +272,7 @@ export class CommonTreeItem<T> extends vscode.TreeItem {
     getContextValue(node: NodeType): string {
         switch (node) {
             case NodeType.ROOT:
-                return "";
+                return '';
             case NodeType.LEAF:
                 return '';
         }
@@ -293,7 +289,7 @@ export class CommonTreeItem<T> extends vscode.TreeItem {
                 command,
                 title,
                 arguments: [this],
-            }
+            };
         }
         return undefined;
     }

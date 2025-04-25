@@ -19,9 +19,7 @@ class CTreeItem extends BasicTreeItem {
         //gist-secret
     }
     public async getChildren(): Promise<ConsulTreeItem[]> {
-        return [
-            new ServiceTreeItem(loc('Service'), 'Service', vscode.TreeItemCollapsibleState.Collapsed, NodeType.ROOT, this.provider),
-        ];
+        return [new ServiceTreeItem(loc('Service'), 'Service', vscode.TreeItemCollapsibleState.Collapsed, NodeType.ROOT, this.provider)];
     }
     static rootItem(provider: ConsulProvider | undefined): CTreeItem {
         return new CTreeItem(loc('AGENT'), 'agent', vscode.TreeItemCollapsibleState.Collapsed, '_agent', provider);

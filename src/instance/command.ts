@@ -157,7 +157,7 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
         try {
             if (item.provider) {
                 const info = await item.provider.getInfo();
-                if(!info){
+                if (!info) {
                     return;
                 }
                 const _text = JSON.stringify(info);
@@ -170,7 +170,7 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
         } catch (error) {
             vscode.window.showErrorMessage(localize('Failed to Get Agent Info: {}', anyToString(error)));
         }
-    }); 
+    });
 
     return [addInstanceCommand, removeInstanceCommand, refreshCommand, connectCommand, disconnectCommand, configureInstanceCommand, snapshotCommand, restoreCommand, info];
 };

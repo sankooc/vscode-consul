@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 // import type vscode from 'vscode';
 import Consul from 'consul';
-import {Agent} from 'consul/lib/agent';
+import { Agent } from 'consul/lib/agent';
 import type { ConsulOptions } from 'consul/lib/consul';
 import { RegisterOptions, ServiceInfo } from 'consul/lib/agent/service';
 import { RegisterOptions as CheckRegisterOptions } from 'consul/lib/agent/check';
@@ -18,7 +18,10 @@ import { Check } from 'consul/lib/agent/check';
 // import htj from 'hcl-to-json';
 
 class ConsulAgent {
-    constructor(private consul:ConsulProvider, private agent: Agent){}
+    constructor(
+        private consul: ConsulProvider,
+        private agent: Agent
+    ) {}
 
     public async registerService(opt: RegisterOptions): Promise<ServiceInfo> {
         const result = await this.agent.service.register(opt);
@@ -60,7 +63,6 @@ class ConsulAgent {
         const listMap = await this.agent.check.list();
         return Object.values(listMap);
     }
-
 }
 
 export default class ConsulProvider {
@@ -187,10 +189,10 @@ export default class ConsulProvider {
                     this.rules.push(Rules);
                 }
             }
-            
+
             this.info = await _consul.agent.self();
             this._consul = _consul;
-            this.agent = new ConsulAgent(this,_consul.agent);;
+            this.agent = new ConsulAgent(this, _consul.agent);
             this.token = token;
             this._isConnected = true;
         } catch (error) {
