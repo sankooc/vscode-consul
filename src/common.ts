@@ -204,7 +204,9 @@ export const upperObj = (opt: any): any => {
 export const RAW_DATA_SCHEMA = 'raw-data';
 
 export function parseQuery(queryString: string): string {
-    if (!queryString) return '';
+    if (!queryString) {
+        return '';
+    }
     const params: Record<string, string> = {};
     try {
         const pairs = queryString.split('&');
@@ -241,3 +243,77 @@ export const anyToString = (value: any): string => {
     }
     return String(value);
 };
+
+export const loc = (label: string): string => {
+    // TODO Localize
+    return label;
+};
+
+export enum NodeType {
+    ROOT = 'ROOT',
+    LEAF = 'LEAF',
+    LEAF_BUILDIN = 'LEAF_BUILDIN',
+}
+export class CommonTreeItem<T> extends vscode.TreeItem {
+    constructor(
+        public readonly label: string,
+        public readonly key: string,
+        public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+        // public readonly contextValue: string,
+        public readonly node: NodeType,
+        public readonly provider: ConsulProvider | undefined
+    ) {
+        super(label, collapsibleState);
+        this.contextValue = this.getContextValue(this.node);
+        this.iconPath = this.getIcon();
+        this.command = this.getCommand();
+    }
+    getIcon(): vscode.ThemeIcon {
+        return new vscode.ThemeIcon(this.getIconId(this.node));
+    }
+    getIconId(node: NodeType): string {
+        return 'globe';
+    }
+    getContextValue(node: NodeType): string {
+        switch (node) {
+            case NodeType.ROOT:
+                return '';
+            case NodeType.LEAF:
+                return '';
+        }
+        throw new Error('Method not implemented.');
+    }
+    child(item: T): CommonTreeItem<T> {
+        throw new Error('Method not implemented.');
+    }
+    getCommand(): vscode.Command | undefined {
+        const args = this.getCommandArgs();
+        if (args && args.length > 0) {
+            const [title, command] = args;
+            return {
+                command,
+                title,
+                arguments: [this],
+            };
+        }
+        return undefined;
+    }
+    getCommandArgs(): string[] | undefined {
+        return undefined;
+    }
+    async children(): Promise<T[]> {
+        throw new Error('Method not implemented.');
+    }
+    async getChildren(): Promise<ConsulTreeItem[]> {
+        if (!this.provider) {
+            return [];
+        }
+        switch (this.node) {
+            case NodeType.ROOT:
+                const items = (await this.children()) || [];
+                return items.map(this.child.bind(this));
+            default:
+                return [];
+        }
+    }
+}

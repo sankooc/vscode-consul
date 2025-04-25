@@ -7,11 +7,7 @@
     "acl": {
       "enabled": true,
       "default_policy": "deny",
-      "enable_token_persistence": true,
-      "tokens": {
-        "agent": "3d461f18-f07a-797c-8bfa-24b1f72445e9",
-        "default": ""
-      }
+      "enable_token_persistence": true
     }
   }
   

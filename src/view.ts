@@ -37,7 +37,6 @@ export default class Viewer {
                     this.mapper[name] = Handlebars.compile(template);
                 }
             }
-            console.log('Template files:', files);
         } catch (error) {
             console.error('Error reading template directory:', error);
         }
@@ -64,11 +63,7 @@ export default class Viewer {
         panel.onDidDispose(() => {
             this.configPanels.delete(key);
         });
-        // console.log('--- path test');
-        // console.log(this.jsfile.fsPath);
-        // const jsfile = panel.webview.asWebviewUri(this.jsfile).toString();
         const host = panel.webview.asWebviewUri(this.context.extensionUri).toString();
-        // console.log(panel.webview.asWebviewUri(this.context.extensionUri).toString());
         const data = { host, ...option.data };
         panel.webview.html = compiler(data);
         panel.webview.onDidReceiveMessage(

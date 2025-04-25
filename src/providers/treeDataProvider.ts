@@ -4,16 +4,18 @@ import ConsulProvider from './consulProvider';
 import KVTreeItem from '../kv/treeitem';
 import ConsulInstanceTreeItem from '../instance/treeitem';
 import ACLTreeItem from '../acl/treeitem';
-import PolicyTreeItem from '../acl/policy/treeitem';
+import AgentTreeItem from '../agent/treeitem';
 import CatalogTreeItem from '../catelog/treeitem';
 import Viewer from '../view';
+import { CommonTreeItem } from '../common';
+import { ServiceInfo } from 'consul/lib/agent/service';
 
 interface ConsulInstanceInfo {
     label: string;
     config: ConsulOptions | null;
 }
 
-export type ConsulTreeItem = ConsulInstanceTreeItem | KVTreeItem | CatalogTreeItem | ACLTreeItem | PolicyTreeItem;
+export type ConsulTreeItem = ConsulInstanceTreeItem | KVTreeItem | CatalogTreeItem | ACLTreeItem | AgentTreeItem | CommonTreeItem<any>;
 
 export class ConsulTreeDataProvider implements vscode.TreeDataProvider<ConsulTreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<void | ConsulInstanceTreeItem | null> = new vscode.EventEmitter<void | ConsulInstanceTreeItem | null>();

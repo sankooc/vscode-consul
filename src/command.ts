@@ -7,6 +7,7 @@ import policy from './acl/policy/command';
 import token from './acl/token/command';
 import role from './acl/role/command';
 import tp from './acl/templatedPolicy/command';
+import agent from './agent/command';
 import { parseQuery, RAW_DATA_SCHEMA } from './common';
 
 export const build = (context: vscode.ExtensionContext, consulTreeProvider: ConsulTreeDataProvider): vscode.Disposable[] => {
@@ -24,5 +25,6 @@ export const build = (context: vscode.ExtensionContext, consulTreeProvider: Cons
         ...token(context, consulTreeProvider),
         ...tp(context, consulTreeProvider),
         ...role(context, consulTreeProvider),
+        ...agent(context, consulTreeProvider),
     ];
 };
