@@ -40,5 +40,6 @@
     "consul.acl.templatedPolicy.view.template.title": "Template",
     "consul.check.register.title": "Register Check",
     "consul.check.deregister.title": "Deregister Check",
-    "consul.agent.check.view.title": "View Check"
+    "consul.agent.check.view.title": "View Check",
+    "consul.agent.service.view.title":"View Service"
 }
