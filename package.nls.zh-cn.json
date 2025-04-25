@@ -25,6 +25,8 @@
     "consul.configureInstance.test.error": "连接测试失败：{0}",
     "consul.deleteKVPair.title": "删除键值对",
     "consul.service.view.title": "详情",
+    "consul.service.register.title": "注册服务",
+    "consul.service.deregister.title": "注销服务",
     "consul.exportAllKV.title": "导出所有 KV",
     "consul.importAllKV.title": "导入所有 KV",
     "consul.acl.policy.add.title": "添加 Consul 策略",
@@ -35,5 +37,8 @@
     "consul.acl.role.del.title": "删除角色",
     "consul.acl.role.edit.title": "编辑角色",
     "consul.acl.templatedPolicy.view.schema.title": "模式",
-    "consul.acl.templatedPolicy.view.template.title": "模板"
+    "consul.acl.templatedPolicy.view.template.title": "模板",
+    "consul.check.register.title": "注册检查",
+    "consul.check.deregister.title": "注销检查",
+    "consul.agent.check.view.title": "查看检查"
 }

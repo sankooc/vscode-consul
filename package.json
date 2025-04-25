@@ -2,7 +2,7 @@
   "name": "vscode-consul",
   "displayName": "VSConsul",
   "description": "Consul integration for VS Code",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "engines": {
     "vscode": "^1.86.2"
   },
@@ -44,6 +44,21 @@
         "command": "consul.addInstance",
         "title": "%consul.addInstance.title%",
         "icon": "$(add)"
+      },
+      {
+        "command": "consul.check.register",
+        "title": "%consul.check.register.title%",
+        "icon": "$(add)"
+      },
+      {
+        "command": "consul.check.deregister",
+        "title": "%consul.check.deregister.title%",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "consul.agent.check.view",
+        "title": "%consul.agent.check.view.title%",
+        "icon": "$(preview)"
       },
       {
         "command": "consul.removeInstance",
@@ -169,6 +184,16 @@
         "command": "consul.service.register",
         "title": "Register Service",
         "icon": "$(add)"
+      },
+      {
+        "command": "consul.service.deregister",
+        "title": "%consul.service.deregister.title%",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "consul.agent.service.view",
+        "title": "%consul.agent.service.view.title%",
+        "icon": "$(preview)"
       }
     ],
     "menus": {
@@ -185,6 +210,21 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "consul.check.register",
+          "when": "viewItem == checkRoot",
+          "group": "inline"
+        },
+        {
+          "command": "consul.check.deregister",
+          "when": "viewItem == checkLeaf",
+          "group": "inline"
+        },
+        {
+          "command": "consul.agent.check.view",
+          "when": "viewItem == checkLeaf",
+          "group": "navigation"
+        },
         {
           "command": "consul.removeInstance",
           "when": "viewItem == consulInstanceDisconnected",
@@ -304,6 +344,16 @@
           "command": "consul.service.register",
           "when": "viewItem == serviceRoot",
           "group": "inline"
+        },
+        {
+          "command": "consul.service.deregister",
+          "when": "viewItem == serviceLeaf",
+          "group": "inline"
+        },
+        {
+          "command": "consul.agent.service.view",
+          "when": "viewItem == serviceLeaf",
+          "group": "navigation"
         }
       ]
     }
@@ -329,7 +379,7 @@
     "pnpm": true
   },
   "dependencies": {
-    "consul": "file:../node-consul",
+    "consul": "github:sankooc/node-consul#2.0.1-acl",
     "handlebars": "^4.7.8"
   },
   "devDependencies": {
@@ -337,13 +387,13 @@
     "@types/mocha": "^10.0.6",
     "@types/node": "20.x",
     "@types/vscode": "^1.86.2",
-    "@typescript-eslint/eslint-plugin": "^7.11.0",
-    "@typescript-eslint/parser": "^7.11.0",
+    "@typescript-eslint/eslint-plugin": "^8.31.0",
+    "@typescript-eslint/parser": "^8.31.0",
     "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^2.4.0",
     "@vscode/webview-ui-toolkit": "^1.4.0",
     "esbuild": ">=0.25.0",
-    "eslint": "^8.57.0",
+    "eslint": "^9.25.1",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.5.3",
     "typescript": "^5.4.5"

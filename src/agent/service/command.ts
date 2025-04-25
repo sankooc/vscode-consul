@@ -5,44 +5,34 @@ import { RegisterOptions } from 'consul/lib/agent/service';
 import ConsulProvider from '../../providers/consulProvider';
 import { buildRawDataURI } from '../../common';
 
-const handleMessage = async (panel: vscode.WebviewPanel, message: { command: string; data: any }, provider: ConsulProvider) => {
-    switch (message.command) {
-        case 'save':
-            try {
-                const data = message.data;
-                const opt: RegisterOptions = {
-                    name: data.name,
-                    id: data.id || data.name,
-                    tags: data.tags ? data.tags.split(',').map((t: string) => t.trim()) : [],
-                    address: data.address,
-                    port: parseInt(data.port),
-                    meta: data.meta ? JSON.parse(data.meta) : undefined,
-                    check: data.check
-                        ? {
-                              name: data.check.name,
-                              http: data.check.http,
-                              interval: data.check.interval,
-                              timeout: data.check.timeout,
-                          }
-                        : undefined,
-                };
-                await provider.agent?.registerService(opt);
-                vscode.window.showInformationMessage('Successfully registered service');
-                panel.dispose();
-                provider.refresh();
-            } catch (error) {
-                vscode.window.showErrorMessage(`Failed to register service: ${error}`);
-            }
-            break;
-        case 'cancel':
-            panel.dispose();
-            break;
-    }
-};
-
 export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvider): vscode.Disposable[] => {
+    const handleMessage = async (panel: vscode.WebviewPanel, message: { command: string; data: any }, consulProvider: ConsulProvider) => {
+        switch (message.command) {
+            case 'save':
+                try {
+                    const data = message.data;
+                    const opt: RegisterOptions = {
+                        name: data.name,
+                        tags: data.tags ? data.tags.split(',').map((t: string) => t.trim()) : [],
+                        address: data.address ? data.address : undefined,
+                        port: data.port ? parseInt(data.port) : undefined,
+                        meta: data.meta ? JSON.parse(data.meta) : undefined,
+                    };
+                    await consulProvider.agent?.registerService(opt);
+                    vscode.window.showInformationMessage('Successfully registered service');
+                    panel.dispose();
+                    provider.refresh();
+                } catch (error) {
+                    vscode.window.showErrorMessage(`Failed to register service: ${error}`);
+                }
+                break;
+            case 'cancel':
+                panel.dispose();
+                break;
+        }
+    };
+
     const register = vscode.commands.registerCommand('consul.service.register', async (item: LoclTreeItem) => {
-        // const provider = item.provider;
         if (item.provider) {
             const opt = {
                 viewType: 'service-register',
@@ -57,17 +47,29 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
     });
 
     const view = vscode.commands.registerCommand('consul.agent.service.view', async (item: LoclTreeItem) => {
-        const id = item.key;
-        const provider = item.provider;
-        if (id && provider) {
-            const content = await provider.agent!.serviceConfig(id);
-            if (content) {
-                const uri = buildRawDataURI(`service-${id}`, 'json', JSON.stringify(content));
-                const doc = await vscode.workspace.openTextDocument(uri);
-                await vscode.window.showTextDocument(doc);
-            }
+        const data = item._item;
+        if (data) {
+            const uri = buildRawDataURI(`service-${item.key}`, 'json', JSON.stringify(data));
+            const doc = await vscode.workspace.openTextDocument(uri);
+            await vscode.window.showTextDocument(doc, { preview: false });
         }
     });
 
-    return [register, view];
+    const deregister = vscode.commands.registerCommand('consul.service.deregister', async (item: LoclTreeItem) => {
+        try {
+            const answer = await vscode.window.showWarningMessage(`Are you sure you want to deregister service ${item.label}?`, { modal: true }, 'Yes');
+
+            if (answer !== 'Yes') {
+                return;
+            }
+
+            await item.provider?.agent?.deregisterService(item.key);
+            provider.refresh();
+            vscode.window.showInformationMessage(`Successfully deregistered service: ${item.key}`);
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to deregister service: ${error}`);
+        }
+    });
+
+    return [register, view, deregister];
 };

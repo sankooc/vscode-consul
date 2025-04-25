@@ -2,6 +2,7 @@ import { ConsulTreeDataProvider } from '../providers/treeDataProvider';
 import vscode from 'vscode';
 
 import agentCommand from './service/command';
+import checkCommand from './check/command';
 
 export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTreeDataProvider): vscode.Disposable[] => {
     // const view = vscode.commands.registerCommand('consul.service.view', async (item: LocTreeItem) => {
@@ -12,5 +13,5 @@ export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTree
 
     //     }
     // });
-    return [...agentCommand(context, consulTreeProvider)];
+    return [...agentCommand(context, consulTreeProvider), ...checkCommand(context, consulTreeProvider)];
 };

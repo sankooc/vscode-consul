@@ -1,1 +1,2 @@
 media/**/*.js linguist-vendored
+resources/**/*.* linguist-vendored

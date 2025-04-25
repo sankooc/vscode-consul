@@ -112,60 +112,6 @@ export default class ConsulProvider {
 
     public checkPermission(acl: string): boolean {
         return true; // TODO
-        // if (!this.rules || this.rules.length === 0) {
-        //     return false;
-        // }
-
-        // const [resource, operation] = acl.split(':');
-        // if (!resource || !operation) {
-        //     return false;
-        // }
-
-        // Check each policy rule
-        // for (const rule of this.rules) {
-        // try {
-        // const parsed = parse(rule);
-
-        // // Check operator policy (full access)
-        // if (parsed.operator === 'write') {
-        //     return true;
-        // }
-
-        // // Check key permissions
-        // if (resource === 'key' && parsed.key) {
-        //     for (const [path, permissions] of Object.entries(parsed.key)) {
-        //         // Check if the permission matches
-        //         if (permissions[operation] === 'allow') {
-        //             return true;
-        //         }
-        //     }
-        // }
-
-        // // Check service permissions
-        // if (resource === 'service' && parsed.service) {
-        //     for (const [serviceName, permissions] of Object.entries(parsed.service)) {
-        //         if (permissions[operation] === 'allow') {
-        //             return true;
-        //         }
-        //     }
-        // }
-
-        // // Check node permissions
-        // if (resource === 'node' && parsed.node) {
-        //     for (const [nodeName, permissions] of Object.entries(parsed.node)) {
-        //         if (permissions[operation] === 'allow') {
-        //             return true;
-        //         }
-        //     }
-        // }
-
-        // } catch (error) {
-        //     console.error('Failed to parse HCL rule:', error);
-        //     continue;
-        // }
-        // }
-
-        // return false;
     }
 
     public async connect(): Promise<void> {

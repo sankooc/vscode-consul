@@ -204,7 +204,9 @@ export const upperObj = (opt: any): any => {
 export const RAW_DATA_SCHEMA = 'raw-data';
 
 export function parseQuery(queryString: string): string {
-    if (!queryString) return '';
+    if (!queryString) {
+        return '';
+    }
     const params: Record<string, string> = {};
     try {
         const pairs = queryString.split('&');
@@ -263,8 +265,11 @@ export class CommonTreeItem<T> extends vscode.TreeItem {
     ) {
         super(label, collapsibleState);
         this.contextValue = this.getContextValue(this.node);
-        this.iconPath = new vscode.ThemeIcon(this.getIconId(this.node));
+        this.iconPath = this.getIcon();
         this.command = this.getCommand();
+    }
+    getIcon(): vscode.ThemeIcon {
+        return new vscode.ThemeIcon(this.getIconId(this.node));
     }
     getIconId(node: NodeType): string {
         return 'globe';

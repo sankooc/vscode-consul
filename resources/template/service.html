@@ -151,47 +151,6 @@
                     <vscode-text-area id="meta" rows="3"></vscode-text-area>
                 </div>
             </div>
-
-            <div class="form-group">
-                <div class="form-label">Health Check <span class="optional-label">(optional)</span></div>
-                <div class="form-description">Configure health check for the service.</div>
-                <div class="form-control">
-                    <div class="check-container">
-                        <div class="form-group">
-                            <div class="form-label">Name <span class="optional-label">(optional)</span></div>
-                            <div class="form-description">Name of the health check.</div>
-                            <div class="form-control">
-                                <vscode-text-field id="check.name"></vscode-text-field>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="form-label">HTTP URL</div>
-                            <div class="form-description">URL to check for service health.</div>
-                            <div class="form-control">
-                                <vscode-text-field id="check.http"></vscode-text-field>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="form-label">Check Interval</div>
-                            <div class="form-description">How often to run the health check (e.g., "10s", "1m").</div>
-                            <div class="form-control">
-                                <vscode-text-field id="check.interval"></vscode-text-field>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="form-label">Check Timeout</div>
-                            <div class="form-description">How long to wait for a response (e.g., "5s", "30s").</div>
-                            <div class="form-control">
-                                <vscode-text-field id="check.timeout"></vscode-text-field>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="button-container">
                 <vscode-button appearance="primary" id="saveButton">Register</vscode-button>
                 <vscode-button appearance="secondary" id="cancelButton">Cancel</vscode-button>
@@ -217,12 +176,6 @@
                 address: document.getElementById('address').value,
                 port: document.getElementById('port').value,
                 meta: document.getElementById('meta').value,
-                check: {
-                    name: document.getElementById('check.name').value,
-                    http: document.getElementById('check.http').value,
-                    interval: document.getElementById('check.interval').value,
-                    timeout: document.getElementById('check.timeout').value
-                }
             };
 
             vscode.postMessage({

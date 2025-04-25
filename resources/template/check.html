@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module" src="{{host}}/media/webview/toolkit.bundle.js"></script>
+    <style>
+        body {
+            padding: 20px;
+        }
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: none;
+        }
+        .form-group {
+            margin-bottom: 24px;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .form-group:hover {
+            background-color: var(--vscode-list-hoverBackground);
+        }
+        .form-group>* {
+            width: 100%;
+        }
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--vscode-foreground);
+        }
+        .form-description {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--vscode-descriptionForeground);
+            font-size: 0.9em;
+        }
+        .form-control {
+            margin-top: 8px;
+        }
+        .form-control>* {
+            width: 100%;
+            display: block;
+        }
+        vscode-text-field,
+        vscode-text-area,
+        vscode-dropdown {
+            width: 100%;
+            display: block;
+        }
+        .button-container {
+            display: flex;
+            gap: 8px;
+            margin-top: 24px;
+        }
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .loading vscode-progress-ring {
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <vscode-progress-ring></vscode-progress-ring>
+        <div>Loading components...</div>
+    </div>
+    <div class="form-container" id="formContainer">
+        <form id="checkForm">
+            <div class="form-group">
+                <div class="form-label">Name *</div>
+                <div class="form-description">The name of the check.</div>
+                <div class="form-control">
+                    <vscode-text-field id="name" required></vscode-text-field>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">ID</div>
+                <div class="form-description">The ID of the check. If not provided, the name will be used.</div>
+                <div class="form-control">
+                    <vscode-text-field id="id"></vscode-text-field>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Notes</div>
+                <div class="form-description">Human readable description of the check.</div>
+                <div class="form-control">
+                    <vscode-text-area id="notes" rows="3"></vscode-text-area>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">HTTP URL *</div>
+                <div class="form-description">HTTP URL to check.</div>
+                <div class="form-control">
+                    <vscode-text-field id="http" required></vscode-text-field>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Interval *</div>
+                <div class="form-description">Interval between checks (e.g., "10s", "1m").</div>
+                <div class="form-control">
+                    <vscode-text-field id="interval" required></vscode-text-field>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Timeout</div>
+                <div class="form-description">Timeout for the check (e.g., "5s").</div>
+                <div class="form-control">
+                    <vscode-text-field id="timeout"></vscode-text-field>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Status</div>
+                <div class="form-description">Initial status of the check.</div>
+                <div class="form-control">
+                    <vscode-dropdown id="status">
+                        <vscode-option value="">Select status...</vscode-option>
+                        <vscode-option value="passing">Passing</vscode-option>
+                        <vscode-option value="warning">Warning</vscode-option>
+                        <vscode-option value="critical">Critical</vscode-option>
+                    </vscode-dropdown>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Service ID</div>
+                <div class="form-description">ID of the service this check is associated with.</div>
+                <div class="form-control">
+                    <vscode-dropdown id="serviceId">
+                        <vscode-option value="">Select service...</vscode-option>
+                        {{#each services}}
+                        <vscode-option value="{{ID}}">{{Service}}</vscode-option>
+                        {{/each}}
+                    </vscode-dropdown>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <vscode-button appearance="primary" id="saveButton">Save</vscode-button>
+                <vscode-button appearance="secondary" id="cancelButton">Cancel</vscode-button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const vscode = acquireVsCodeApi();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('formContainer').style.display = 'block';
+        });
+
+        // Save button
+        document.getElementById('saveButton').addEventListener('click', (e) => {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById('name').value,
+                id: document.getElementById('id').value,
+                notes: document.getElementById('notes').value,
+                http: document.getElementById('http').value,
+                interval: document.getElementById('interval').value,
+                timeout: document.getElementById('timeout').value,
+                status: document.getElementById('status').value,
+                serviceId: document.getElementById('serviceId').value,
+            };
+
+            vscode.postMessage({
+                command: 'save',
+                data: formData
+            });
+        });
+
+        // Cancel button
+        document.getElementById('cancelButton').addEventListener('click', () => {
+            vscode.postMessage({
+                command: 'cancel'
+            });
+        });
+    </script>
+</body>
+</html>

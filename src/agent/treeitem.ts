@@ -3,6 +3,7 @@ import ConsulProvider from '../providers/consulProvider';
 import { BasicTreeItem, loc, NodeType } from '../common';
 import { ConsulTreeItem } from '../providers/treeDataProvider';
 import ServiceTreeItem from './service/treeitem';
+import CheckTreeItem from './check/treeitem';
 
 class CTreeItem extends BasicTreeItem {
     constructor(
@@ -19,10 +20,13 @@ class CTreeItem extends BasicTreeItem {
         //gist-secret
     }
     public async getChildren(): Promise<ConsulTreeItem[]> {
-        return [new ServiceTreeItem(loc('Service'), 'Service', vscode.TreeItemCollapsibleState.Collapsed, NodeType.ROOT, this.provider)];
+        return [
+            new ServiceTreeItem(loc('Service'), 'Service', vscode.TreeItemCollapsibleState.Collapsed, NodeType.ROOT, this.provider),
+            new CheckTreeItem(loc('Check'), 'check', vscode.TreeItemCollapsibleState.Collapsed, NodeType.ROOT, this.provider),
+        ];
     }
     static rootItem(provider: ConsulProvider | undefined): CTreeItem {
-        return new CTreeItem(loc('AGENT'), 'agent', vscode.TreeItemCollapsibleState.Collapsed, '_agent', provider);
+        return new CTreeItem(loc('Agent'), 'agent', vscode.TreeItemCollapsibleState.Collapsed, '_agent', provider);
     }
 }
 

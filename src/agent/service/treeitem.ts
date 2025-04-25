@@ -3,6 +3,7 @@ import { ServiceInfo } from 'consul/lib/agent/service';
 import { CommonTreeItem, NodeType } from '../../common';
 
 export default class CTreeItem extends CommonTreeItem<ServiceInfo> {
+    public _item?: ServiceInfo;
     getIconId(node: NodeType): string {
         switch (node) {
             case NodeType.ROOT:
@@ -29,6 +30,7 @@ export default class CTreeItem extends CommonTreeItem<ServiceInfo> {
     }
     child(item: ServiceInfo): CommonTreeItem<ServiceInfo> {
         const it = new CTreeItem(item.Service, item.ID, vscode.TreeItemCollapsibleState.None, NodeType.LEAF, this.provider);
+        it._item = item;
         return it;
     }
     async children(): Promise<ServiceInfo[]> {
