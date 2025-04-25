@@ -29,7 +29,6 @@
 - **Key/Value Store Management**: Perform CRUD operations on Consul's KV store with ease.
 - **Catalog Browsing**: Explore and view details of services and nodes registered in Consul's catalog.
 - **Configuration Interface**: Provides a configuration page for Consul instances that are not yet connected, allowing you to set connection options with save, cancel, and test connection functionalities.
-- **Enhanced Security**: Added confirmation dialogs for critical operations like deleting instances, ACL tokens, and roles.
 - **Snapshot Management**: Create and restore Consul snapshots with improved UI navigation.
 - **ACL Management**: Comprehensive management of Consul ACL tokens and roles with safety confirmations.
 

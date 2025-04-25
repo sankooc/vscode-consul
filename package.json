@@ -61,6 +61,11 @@
         "icon": "$(debug-disconnect)"
       },
       {
+        "command": "consul.agent.self",
+        "title": "%consul.agent.title%",
+        "icon": "$(info)"
+      },
+      {
         "command": "consul.refresh",
         "title": "%consul.refresh.title%",
         "icon": "$(refresh)"
@@ -191,6 +196,11 @@
           "group": "inline"
         },
         {
+          "command": "consul.agent.self",
+          "when": "viewItem == consulInstanceConnected",
+          "group": "inline"
+        },
+        {
           "command": "consul.configureInstance",
           "when": "viewItem == consulInstanceDisconnected",
           "group": "inline"
@@ -309,7 +319,7 @@
     "pnpm": true
   },
   "dependencies": {
-    "consul": "github:sankooc/node-consul#2.0.1-acl",
+    "consul": "file:../node-consul",
     "handlebars": "^4.7.8"
   },
   "devDependencies": {

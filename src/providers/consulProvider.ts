@@ -8,7 +8,7 @@ import ConsulInstanceTreeItem from '../instance/treeitem';
 import KVTreeItem from '../kv/treeitem';
 import CatalogTreeItem from '../catelog/treeitem';
 import { PolicyCreateOption, PolicyResult } from 'consul/lib/acl/policy';
-import { TokenResult, TokenUpdateOptions } from 'consul/lib/acl/token';
+import { TokenResult, TokenUpdateOptions, UpdateResult } from 'consul/lib/acl/token';
 import { Role } from 'consul/lib/acl/role';
 import { TemplatedPolicy } from 'consul/lib/acl/templatedPolicy';
 // import * as parser from 'hcl2-parser';
@@ -24,6 +24,7 @@ export default class ConsulProvider {
     private cfg: ConsulOptions | undefined;
     private _isConnected: boolean = false;
     private token?: TokenResult;
+    private info?: any;
     private rules: any[] = [];
     constructor(private label: string) {}
 
@@ -35,6 +36,9 @@ export default class ConsulProvider {
         return this.label;
     }
 
+    public getInfo(): any {
+        return this.info;
+    }
     public setConfig(opt: ConsulOptions): void {
         this.cfg = opt;
     }
@@ -119,6 +123,8 @@ export default class ConsulProvider {
         try {
             this._consul = new Consul(this.cfg);
             const token = await this._consul.acl.token.readSelf();
+            this.info = await this._consul.agent.self();
+            // const json = JSON.stringify(info);
             const { Policies } = token;
             if (!Policies || !Policies.length) {
                 throw new Error('no policies');
@@ -134,16 +140,6 @@ export default class ConsulProvider {
             }
             this.token = token;
             this._isConnected = true;
-
-            // this._consul.acl.policy.read();
-            // const sf = await this._consul.agent.self();
-            // if (sf?.Config?.NodeName) {
-            //     //todo ??
-            //     // this._instance = sf.Config;
-            //     this._isConnected = true;
-            // } else {
-            //     vscode.window.showErrorMessage('connect failed');
-            // }
         } catch (error) {
             this._isConnected = false;
             throw error;
@@ -381,7 +377,7 @@ export default class ConsulProvider {
         this.check();
         return this._consul!.acl.token.read(id);
     }
-    public async update_token(id: string, data: TokenUpdateOptions): Promise<TokenResult> {
+    public async update_token(id: string, data: TokenUpdateOptions): Promise<UpdateResult> {
         this.check();
         return this._consul!.acl.token.update(id, data);
     }

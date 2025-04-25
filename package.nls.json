@@ -1,4 +1,5 @@
 {
+    "consul.agent.title": "Agent Info",
     "consul.snapshot": "Consul Snapshot",
     "consul.snapshot.failed": "Create snapshot failed: {0}",
     "consul.snapshot.success": "Create snapshot success",

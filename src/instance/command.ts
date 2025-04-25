@@ -3,7 +3,7 @@ import ConsulInstanceTreeItem from './treeitem';
 import { ConsulTreeDataProvider } from '../providers/treeDataProvider';
 import vscode from 'vscode';
 import Consul from 'consul';
-import { anyToString } from '../common';
+import { anyToString, buildRawDataURI } from '../common';
 
 export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvider): vscode.Disposable[] => {
     const localize = (message: string, ...args: Array<string | number | boolean>) => {
@@ -153,5 +153,24 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
         }
     });
 
-    return [addInstanceCommand, removeInstanceCommand, refreshCommand, connectCommand, disconnectCommand, configureInstanceCommand, snapshotCommand, restoreCommand];
+    const info = vscode.commands.registerCommand('consul.agent.self', async (item: ConsulInstanceTreeItem) => {
+        try {
+            if (item.provider) {
+                const info = await item.provider.getInfo();
+                if(!info){
+                    return;
+                }
+                const _text = JSON.stringify(info);
+                if (_text) {
+                    const uri = buildRawDataURI('agent info', 'json', _text);
+                    const doc = await vscode.workspace.openTextDocument(uri);
+                    await vscode.window.showTextDocument(doc);
+                }
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(localize('Failed to Get Agent Info: {}', anyToString(error)));
+        }
+    }); 
+
+    return [addInstanceCommand, removeInstanceCommand, refreshCommand, connectCommand, disconnectCommand, configureInstanceCommand, snapshotCommand, restoreCommand, info];
 };
