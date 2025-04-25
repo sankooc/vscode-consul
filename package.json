@@ -164,6 +164,11 @@
         "command": "consul.restore",
         "title": "%consul.restore%",
         "icon": "$(sync)"
+      },
+      {
+        "command": "consul.service.register",
+        "title": "Register Service",
+        "icon": "$(add)"
       }
     ],
     "menus": {
@@ -294,6 +299,11 @@
           "command": "consul.acl.templatedPolicy.view.template",
           "when": "viewItem == tp_leaf",
           "group": "navigation"
+        },
+        {
+          "command": "consul.service.register",
+          "when": "viewItem == serviceRoot",
+          "group": "inline"
         }
       ]
     }

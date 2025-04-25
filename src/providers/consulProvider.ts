@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
 // import type vscode from 'vscode';
 import Consul from 'consul';
+import {Agent} from 'consul/lib/agent';
 import type { ConsulOptions } from 'consul/lib/consul';
-import { RegisterOptions } from 'consul/lib/agent/service';
+import { RegisterOptions, ServiceInfo } from 'consul/lib/agent/service';
+import { RegisterOptions as CheckRegisterOptions } from 'consul/lib/agent/check';
 import { ConsulNode, ConsulService, KVItem } from '../common';
 import ConsulInstanceTreeItem from '../instance/treeitem';
 import KVTreeItem from '../kv/treeitem';
@@ -11,15 +13,63 @@ import { PolicyCreateOption, PolicyResult } from 'consul/lib/acl/policy';
 import { TokenResult, TokenUpdateOptions, UpdateResult } from 'consul/lib/acl/token';
 import { Role } from 'consul/lib/acl/role';
 import { TemplatedPolicy } from 'consul/lib/acl/templatedPolicy';
+import { Check } from 'consul/lib/agent/check';
 // import * as parser from 'hcl2-parser';
 // import htj from 'hcl-to-json';
 
+class ConsulAgent {
+    constructor(private consul:ConsulProvider, private agent: Agent){}
+
+    public async registerService(opt: RegisterOptions): Promise<ServiceInfo> {
+        const result = await this.agent.service.register(opt);
+        if (result) {
+            this.consul.refresh();
+        }
+        return result;
+    }
+    public async deregisterService(id: string): Promise<void> {
+        const result = await this.agent.service.deregister(id);
+        if (result) {
+            this.consul.refresh();
+        }
+        return result;
+    }
+    public async listService(): Promise<ServiceInfo[]> {
+        const listMap = await this.agent.service.list();
+        return Object.values(listMap);
+    }
+
+    public async serviceConfig(id: string): Promise<ServiceInfo> {
+        return this.agent.service.config(id);
+    }
+
+    public async registerCheck(opt: CheckRegisterOptions): Promise<Check> {
+        const result = await this.agent.check.register(opt);
+        if (result) {
+            this.consul.refresh();
+        }
+        return result;
+    }
+    public async deregisterCheck(id: string): Promise<void> {
+        const result = await this.agent.check.deregister(id);
+        if (result) {
+            this.consul.refresh();
+        }
+    }
+    public async listChecks(): Promise<Check[]> {
+        const listMap = await this.agent.check.list();
+        return Object.values(listMap);
+    }
+
+}
+
 export default class ConsulProvider {
     private _consul: Consul | undefined;
-    private _onDidChangeKVTreeData: vscode.EventEmitter<void | KVTreeItem | null> = new vscode.EventEmitter<void | KVTreeItem | null>();
-    private _onDidChangeServiceTreeData: vscode.EventEmitter<void | CatalogTreeItem | null> = new vscode.EventEmitter<void | CatalogTreeItem | null>();
-    readonly onDidChangeKVTreeData: vscode.Event<void | KVTreeItem | null> = this._onDidChangeKVTreeData.event;
-    readonly onDidChangeServiceTreeData: vscode.Event<void | CatalogTreeItem | null> = this._onDidChangeServiceTreeData.event;
+    public agent: ConsulAgent | undefined;
+    private _onDidChangeTreeData: vscode.EventEmitter<void | KVTreeItem | null> = new vscode.EventEmitter<void | KVTreeItem | null>();
+    // private _onDidChangeServiceTreeData: vscode.EventEmitter<void | CatalogTreeItem | null> = new vscode.EventEmitter<void | CatalogTreeItem | null>();
+    readonly onDidChangeTreeData: vscode.Event<void | KVTreeItem | null> = this._onDidChangeTreeData.event;
+    // readonly onDidChangeServiceTreeData: vscode.Event<void | CatalogTreeItem | null> = this._onDidChangeServiceTreeData.event;
 
     private cfg: ConsulOptions | undefined;
     private _isConnected: boolean = false;
@@ -121,9 +171,8 @@ export default class ConsulProvider {
             throw new Error('no consul config');
         }
         try {
-            this._consul = new Consul(this.cfg);
-            const token = await this._consul.acl.token.readSelf();
-            this.info = await this._consul.agent.self();
+            const _consul = new Consul(this.cfg);
+            const token = await _consul.acl.token.readSelf();
             // const json = JSON.stringify(info);
             const { Policies } = token;
             if (!Policies || !Policies.length) {
@@ -131,13 +180,17 @@ export default class ConsulProvider {
             }
             for (const p of Policies) {
                 const { ID } = p;
-                const { Rules } = await this._consul.acl.policy.read(ID);
+                const { Rules } = await _consul.acl.policy.read(ID);
                 if (Rules) {
                     // const rs = parser.parseToObject(Rules);
                     // this.rules.push(...rs);
                     this.rules.push(Rules);
                 }
             }
+            
+            this.info = await _consul.agent.self();
+            this._consul = _consul;
+            this.agent = new ConsulAgent(this,_consul.agent);;
             this.token = token;
             this._isConnected = true;
         } catch (error) {
@@ -152,8 +205,8 @@ export default class ConsulProvider {
     }
 
     public refresh(): void {
-        this._onDidChangeKVTreeData.fire();
-        this._onDidChangeServiceTreeData.fire();
+        this._onDidChangeTreeData.fire();
+        // this._onDidChangeServiceTreeData.fire();
     }
 
     public async loadAllKV(): Promise<KVItem[]> {
@@ -237,22 +290,6 @@ export default class ConsulProvider {
         return [];
     }
 
-    public async registerService(opt: RegisterOptions): Promise<void> {
-        if (!this._consul) {
-            throw new Error('Consul client not initialized');
-        }
-        try {
-            const result = await this._consul.agent.service.register(opt);
-            if (result) {
-                this._onDidChangeServiceTreeData.fire();
-            }
-            return result;
-        } catch (error) {
-            vscode.window.showErrorMessage('Failed to register');
-            throw error;
-        }
-    }
-
     public async updateKV(key: string, value: string): Promise<void> {
         if (!this._consul) {
             throw new Error('Not connected to Consul');
@@ -303,7 +340,7 @@ export default class ConsulProvider {
         try {
             const result = await this._consul.kv.set(key, value);
             if (result) {
-                this._onDidChangeKVTreeData.fire();
+                this.refresh();
             }
             return result;
         } catch (error) {
@@ -319,7 +356,7 @@ export default class ConsulProvider {
         try {
             const result = await this._consul.catalog.register(opt as any);
             if (result) {
-                this._onDidChangeKVTreeData.fire();
+                this.refresh();
             }
             // return result;
         } catch (error) {

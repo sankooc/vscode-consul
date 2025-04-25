@@ -5,6 +5,7 @@ import { ConsulTreeItem } from '../providers/treeDataProvider';
 import KVTreeItem from '../kv/treeitem';
 import ACLTreeItem from '../acl/treeitem';
 import CatalogTreeItem from '../catelog/treeitem';
+import AgentTreeItem from '../agent/treeitem';
 
 export default class CTreeItem extends BasicTreeItem {
     constructor(
@@ -27,6 +28,6 @@ export default class CTreeItem extends BasicTreeItem {
         if (!this.isConnected) {
             return [];
         }
-        return [ACLTreeItem.rootItem(this.provider), KVTreeItem.rootItem(this.provider), CatalogTreeItem.rootItem(this.provider)];
+        return [ACLTreeItem.rootItem(this.provider), KVTreeItem.rootItem(this.provider), AgentTreeItem.rootItem(this.provider), CatalogTreeItem.rootItem(this.provider)];
     }
 }

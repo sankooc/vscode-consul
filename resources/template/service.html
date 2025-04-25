@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module" src="{{host}}/media/webview/toolkit.bundle.js"></script>
+    <style>
+        body {
+            padding: 20px;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .form-group:hover {
+            background-color: var(--vscode-list-hoverBackground);
+        }
+
+        .form-group>* {
+            width: 100%;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--vscode-foreground);
+        }
+
+        .form-description {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--vscode-descriptionForeground);
+            font-size: 0.9em;
+        }
+
+        .form-control {
+            margin-top: 8px;
+        }
+
+        .form-control>* {
+            width: 100%;
+        }
+
+        .optional-label {
+            font-weight: normal;
+            font-size: 0.9em;
+            color: var(--vscode-descriptionForeground);
+        }
+
+        .button-container {
+            margin-top: 32px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 16px;
+        }
+
+        .loading div {
+            color: var(--vscode-descriptionForeground);
+        }
+
+        .check-container {
+            border: 1px solid var(--vscode-input-border);
+            border-radius: 4px;
+            padding: 16px;
+            margin-top: 8px;
+        }
+
+        .check-container .form-group {
+            margin-bottom: 16px;
+            padding: 0;
+        }
+
+        .check-container .form-group:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading" id="loading">
+        <vscode-progress-ring></vscode-progress-ring>
+        <div>Loading components...</div>
+    </div>
+
+    <div class="form-container" id="formContainer">
+        <form id="serviceForm">
+            <div class="form-group">
+                <div class="form-label">Service Name</div>
+                <div class="form-description">The name of the service to register.</div>
+                <div class="form-control">
+                    <vscode-text-field id="name" required></vscode-text-field>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Service ID <span class="optional-label">(optional)</span></div>
+                <div class="form-description">A unique identifier for this service instance. If not provided, the service name will be used.</div>
+                <div class="form-control">
+                    <vscode-text-field id="id"></vscode-text-field>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Tags <span class="optional-label">(optional)</span></div>
+                <div class="form-description">Comma-separated list of tags to associate with the service.</div>
+                <div class="form-control">
+                    <vscode-text-field id="tags"></vscode-text-field>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Address <span class="optional-label">(optional)</span></div>
+                <div class="form-description">The address where the service is running.</div>
+                <div class="form-control">
+                    <vscode-text-field id="address"></vscode-text-field>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Port <span class="optional-label">(optional)</span></div>
+                <div class="form-description">The port number where the service is running.</div>
+                <div class="form-control">
+                    <vscode-text-field type="number" id="port"></vscode-text-field>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Meta <span class="optional-label">(optional)</span></div>
+                <div class="form-description">Arbitrary key-value pairs in JSON format.</div>
+                <div class="form-control">
+                    <vscode-text-area id="meta" rows="3"></vscode-text-area>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Health Check <span class="optional-label">(optional)</span></div>
+                <div class="form-description">Configure health check for the service.</div>
+                <div class="form-control">
+                    <div class="check-container">
+                        <div class="form-group">
+                            <div class="form-label">Name <span class="optional-label">(optional)</span></div>
+                            <div class="form-description">Name of the health check.</div>
+                            <div class="form-control">
+                                <vscode-text-field id="check.name"></vscode-text-field>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-label">HTTP URL</div>
+                            <div class="form-description">URL to check for service health.</div>
+                            <div class="form-control">
+                                <vscode-text-field id="check.http"></vscode-text-field>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-label">Check Interval</div>
+                            <div class="form-description">How often to run the health check (e.g., "10s", "1m").</div>
+                            <div class="form-control">
+                                <vscode-text-field id="check.interval"></vscode-text-field>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-label">Check Timeout</div>
+                            <div class="form-description">How long to wait for a response (e.g., "5s", "30s").</div>
+                            <div class="form-control">
+                                <vscode-text-field id="check.timeout"></vscode-text-field>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <vscode-button appearance="primary" id="saveButton">Register</vscode-button>
+                <vscode-button appearance="secondary" id="cancelButton">Cancel</vscode-button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const vscode = acquireVsCodeApi();
+
+        // Show form after components are loaded
+        window.addEventListener('load', () => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('formContainer').style.display = 'block';
+        });
+
+        document.getElementById('saveButton').addEventListener('click', (e) => {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById('name').value,
+                id: document.getElementById('id').value,
+                tags: document.getElementById('tags').value,
+                address: document.getElementById('address').value,
+                port: document.getElementById('port').value,
+                meta: document.getElementById('meta').value,
+                check: {
+                    name: document.getElementById('check.name').value,
+                    http: document.getElementById('check.http').value,
+                    interval: document.getElementById('check.interval').value,
+                    timeout: document.getElementById('check.timeout').value
+                }
+            };
+
+            vscode.postMessage({
+                command: 'save',
+                data: formData
+            });
+        });
+
+        document.getElementById('cancelButton').addEventListener('click', () => {
+            vscode.postMessage({
+                command: 'cancel'
+            });
+        });
+    </script>
+</body>
+
+</html>
