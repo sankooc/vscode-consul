@@ -218,7 +218,7 @@
         {
           "command": "consul.check.deregister",
           "when": "viewItem == checkLeaf",
-          "group": "inline"
+          "group": "navigation"
         },
         {
           "command": "consul.agent.check.view",
@@ -228,7 +228,7 @@
         {
           "command": "consul.removeInstance",
           "when": "viewItem == consulInstanceDisconnected",
-          "group": "inline"
+          "group": "navigation"
         },
         {
           "command": "consul.connect",
@@ -273,7 +273,7 @@
         {
           "command": "consul.deleteKV",
           "when": "viewItem == kvItem",
-          "group": "inline"
+          "group": "navigation"
         },
         {
           "command": "consul.refreshKV",
@@ -283,7 +283,7 @@
         {
           "command": "consul.deleteKVPair",
           "when": "viewItem == kvLeaf",
-          "group": "inline"
+          "group": "navigation"
         },
         {
           "command": "consul.service.view",
@@ -308,7 +308,7 @@
         {
           "command": "consul.acl.policy.del",
           "when": "viewItem == policy_leaf",
-          "group": "inline"
+          "group": "navigation"
         },
         {
           "command": "consul.acl.token.add",
@@ -318,7 +318,7 @@
         {
           "command": "consul.acl.token.del",
           "when": "viewItem == token_leaf",
-          "group": "inline"
+          "group": "navigation"
         },
         {
           "command": "consul.acl.role.add",
@@ -328,7 +328,7 @@
         {
           "command": "consul.acl.role.del",
           "when": "viewItem == role_leaf",
-          "group": "inline"
+          "group": "navigation"
         },
         {
           "command": "consul.acl.templatedPolicy.view.schema",
@@ -348,7 +348,7 @@
         {
           "command": "consul.service.deregister",
           "when": "viewItem == serviceLeaf",
-          "group": "inline"
+          "group": "navigation"
         },
         {
           "command": "consul.agent.service.view",
