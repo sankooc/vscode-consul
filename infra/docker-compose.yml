@@ -4,7 +4,7 @@ services:
     hostname: "consul-master"
     command: agent -server -bootstrap-expect=1 -ui -client=0.0.0.0 -config-dir=/consul/config
     volumes:
-      - /data/data/consul-master:/consul/data
+      - /data/consul/consul-master:/consul/data
       - ./consul.json:/consul/config/consul.json
     networks:
       - consul
@@ -16,7 +16,7 @@ services:
     hostname: "consul2"
     command: "agent -server -join consul -disable-host-node-id -config-dir=/consul/config"
     volumes:
-      - /data/data/consul2:/consul/data
+      - /data/consul/consul2:/consul/data
     networks:
       - consul
     depends_on: 
@@ -26,7 +26,7 @@ services:
     hostname: "consul3"
     command: "agent -server -join consul -disable-host-node-id -config-dir=/consul/config"
     volumes:
-      - /data/data/consul3:/consul/data
+      - /data/consul/consul3:/consul/data
     networks:
       - consul
     depends_on: 
