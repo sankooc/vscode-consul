@@ -28,6 +28,11 @@ export default class CTreeItem extends BasicTreeItem {
         if (!this.isConnected) {
             return [];
         }
-        return [ACLTreeItem.rootItem(this.provider), KVTreeItem.rootItem(this.provider), AgentTreeItem.rootItem(this.provider), CatalogTreeItem.rootItem(this.provider)];
+        const items = [];
+        if (await this.provider.checkPermission('acl')) { items.push(ACLTreeItem.rootItem(this.provider)); }
+        if (await this.provider.checkPermission('kv')) { items.push(KVTreeItem.rootItem(this.provider)); }
+        if (await this.provider.checkPermission('agent')) { items.push(AgentTreeItem.rootItem(this.provider)); }
+        if (await this.provider.checkPermission('catalog')) { items.push(CatalogTreeItem.rootItem(this.provider)); }
+        return items;
     }
 }

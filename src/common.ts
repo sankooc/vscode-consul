@@ -238,10 +238,11 @@ export const buildRawDataURI = (name: string, type: string, data: string): vscod
 };
 
 export const anyToString = (value: any): string => {
-    if (typeof value === 'object') {
-        return JSON.stringify(value);
-    }
-    return String(value);
+    // if (typeof value === 'object') {
+    //     return JSON.stringify(value);
+    // }
+    // return String(value);
+    return "";
 };
 
 export const loc = (label: string): string => {

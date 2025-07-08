@@ -10,10 +10,10 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
         const handleMessage = async (panel: vscode.WebviewPanel, message: { command: string; data: any }) => {
             switch (message.command) {
                 case 'save':
-                    try {
+                    try { 
                         const data = message.data;
                         const opt = upperObj(data);
-                        await item.provider?.add_token(opt);
+                        const rs = await item.provider?.add_token(opt);
                         vscode.window.showInformationMessage('Successfully added token');
                         panel.dispose();
                         provider.refresh();

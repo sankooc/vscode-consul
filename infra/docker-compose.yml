@@ -6,6 +6,7 @@ services:
     volumes:
       - /data/consul/consul-master:/consul/data
       - ./consul.json:/consul/config/consul.json
+      - ./anonymous.hcl:/conf/anonymous.hcl
     networks:
       - consul
     ports:

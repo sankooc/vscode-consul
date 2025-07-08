@@ -85,10 +85,11 @@ export default (context: vscode.ExtensionContext, provider: ConsulTreeDataProvid
                     try {
                         const cfg: ConsulOptions = message.config;
                         const consul = new Consul(cfg);
-                        await consul.agent.members();
+                        await consul.acl.token.readSelf();
                         vscode.window.showInformationMessage(localize('Configuration Test Successful', node.label));
                     } catch (error) {
-                        vscode.window.showErrorMessage(localize('Failed to Test Configuration', anyToString(error)));
+                        vscode.window.showErrorMessage(localize('Failed to Test Configuration'));
+                        console.error(error);
                     }
                     break;
                 case 'cancel':

@@ -10,6 +10,10 @@
   <a href="https://marketplace.visualstudio.com/items?itemName=sankooc.vscode-consul">
     <img src="https://img.shields.io/visual-studio-marketplace/d/sankooc.vscode-consul" alt="Download Count">
   </a>
+  <a href="https://open-vsx.org/extension/sankooc/vscode-consul">
+    <img src="https://img.shields.io/open-vsx/dt/sankooc/vscode-consul?label=open-vsx%20download
+    " alt="Download Count">
+  </a>
   <a href="https://marketplace.visualstudio.com/items?itemName=sankooc.vscode-consul">
     <img src="https://img.shields.io/visual-studio-marketplace/last-updated/sankooc.vscode-consul" alt="Last Updated">
   </a>

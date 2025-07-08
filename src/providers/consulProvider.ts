@@ -16,6 +16,7 @@ import { TemplatedPolicy } from 'consul/lib/acl/templatedPolicy';
 import { Check } from 'consul/lib/agent/check';
 // import * as parser from 'hcl2-parser';
 // import htj from 'hcl-to-json';
+// import hclToJson from "hcl-to-json";
 
 class ConsulAgent {
     constructor(
@@ -88,8 +89,8 @@ export default class ConsulProvider {
         return this.label;
     }
 
-    public getInfo(): any {
-        return this.info;
+    public async getInfo(): Promise<any> {
+        return this._consul?.agent.self();
     }
     public setConfig(opt: ConsulOptions): void {
         this.cfg = opt;
@@ -110,8 +111,28 @@ export default class ConsulProvider {
         return 'unkown';
     }
 
-    public checkPermission(acl: string): boolean {
-        return true; // TODO
+    public async checkPermission(acl: string): Promise<boolean> {
+        try {
+            switch(acl){
+                case 'acl':{ // acl:read
+                    await this._consul?.acl.token.list();
+                    return true;
+                }
+                case 'kv': // key:read
+                    await this._consul?.kv.keys('');
+                    return true;
+                case 'catalog': // node:read
+                    await this._consul?.catalog.node.list();
+                    return true;
+                case 'agent': { // service:read
+                    await this._consul?.agent.services();
+                    return true;
+                }
+            }
+        } catch(error){
+
+        }
+        return false; // TODO
     }
 
     public async connect(): Promise<void> {
@@ -122,21 +143,23 @@ export default class ConsulProvider {
             const _consul = new Consul(this.cfg);
             const token = await _consul.acl.token.readSelf();
             // const json = JSON.stringify(info);
-            const { Policies } = token;
-            if (!Policies || !Policies.length) {
-                throw new Error('no policies');
-            }
-            for (const p of Policies) {
-                const { ID } = p;
-                const { Rules } = await _consul.acl.policy.read(ID);
-                if (Rules) {
-                    // const rs = parser.parseToObject(Rules);
-                    // this.rules.push(...rs);
-                    this.rules.push(Rules);
-                }
-            }
+            // const { Policies } = token;
+            // if (!Policies || !Policies.length) {
+            //     throw new Error('no policies');
+            // }
+            
+            // for (const p of Policies) {
+            //     const { ID } = p;
+            //     const { Rules } = await _consul.acl.policy.read(ID);
+            //     if (Rules) {
+            //         const rs = hclToJson(Rules);
+            //         // const rs = parser.parseToObject(Rules);
+            //         // this.rules.push(...rs);
+            //         this.rules.push(Rules);
+            //     }
+            // }
 
-            this.info = await _consul.agent.self();
+            // this.info = await _consul.agent.self();
             this._consul = _consul;
             this.agent = new ConsulAgent(this, _consul.agent);
             this.token = token;
