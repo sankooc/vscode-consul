@@ -18,6 +18,7 @@
     "consul.addKV.title": "添加键值对",
     "consul.editKV.title": "编辑值",
     "consul.deleteKV.title": "删除键",
+    "consul.duplicate.title": "复制目录",
     "consul.configureInstance.title": "配置 Consul 实例",
     "consul.configureInstance.save.success": "配置保存成功",
     "consul.configureInstance.save.error": "保存配置失败：{0}",

@@ -19,6 +19,7 @@
     "consul.addKV.title": "Add Key-Value",
     "consul.editKV.title": "Edit Value",
     "consul.deleteKV.title": "Delete Key",
+    "consul.duplicate.title": "Duplicate Folder",
     "consul.configureInstance.title": "Configure Consul Instance",
     "consul.configureInstance.save.success": "Configuration saved successfully",
     "consul.configureInstance.save.error": "Failed to save configuration: {0}",

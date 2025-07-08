@@ -2,7 +2,7 @@
   "name": "vscode-consul",
   "displayName": "VSConsul",
   "description": "Consul integration for VS Code",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "engines": {
     "vscode": "^1.86.2"
   },
@@ -101,9 +101,9 @@
         "icon": "$(edit)"
       },
       {
-        "command": "consul.deleteKV",
-        "title": "%consul.deleteKV.title%",
-        "icon": "$(trash)"
+        "command": "consul.duplicate",
+        "title": "%consul.duplicate.title%",
+        "icon": "$(copy)"
       },
       {
         "command": "consul.configureInstance",
@@ -271,8 +271,8 @@
           "group": "inline"
         },
         {
-          "command": "consul.deleteKV",
-          "when": "viewItem == kvItem",
+          "command": "consul.deleteKVPair",
+          "when": "viewItem == kvFolder",
           "group": "navigation"
         },
         {
@@ -298,6 +298,16 @@
         {
           "command": "consul.importAllKV",
           "when": "viewItem == kvRoot",
+          "group": "navigation"
+        },
+        {
+          "command": "consul.addKV",
+          "when": "viewItem == kvFolder",
+          "group": "inline"
+        },
+        {
+          "command": "consul.duplicate",
+          "when": "viewItem == kvFolder",
           "group": "navigation"
         },
         {
@@ -380,6 +390,7 @@
   },
   "dependencies": {
     "consul": "github:sankooc/node-consul#2.0.1-acl",
+    "brace-expansion": ">=2.0.2",
     "handlebars": "^4.7.8"
   },
   "devDependencies": {

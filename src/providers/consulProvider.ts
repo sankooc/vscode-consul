@@ -14,6 +14,7 @@ import { TokenResult, TokenUpdateOptions, UpdateResult } from 'consul/lib/acl/to
 import { Role } from 'consul/lib/acl/role';
 import { TemplatedPolicy } from 'consul/lib/acl/templatedPolicy';
 import { Check } from 'consul/lib/agent/check';
+import { KeysResult } from 'consul/lib/kv';
 // import * as parser from 'hcl2-parser';
 // import htj from 'hcl-to-json';
 // import hclToJson from "hcl-to-json";
@@ -22,7 +23,7 @@ class ConsulAgent {
     constructor(
         private consul: ConsulProvider,
         private agent: Agent
-    ) {}
+    ) { }
 
     public async registerService(opt: RegisterOptions): Promise<ServiceInfo> {
         const result = await this.agent.service.register(opt);
@@ -79,7 +80,7 @@ export default class ConsulProvider {
     private token?: TokenResult;
     private info?: any;
     private rules: any[] = [];
-    constructor(private label: string) {}
+    constructor(private label: string) { }
 
     public get isConnected(): boolean {
         return this._isConnected;
@@ -113,8 +114,8 @@ export default class ConsulProvider {
 
     public async checkPermission(acl: string): Promise<boolean> {
         try {
-            switch(acl){
-                case 'acl':{ // acl:read
+            switch (acl) {
+                case 'acl': { // acl:read
                     await this._consul?.acl.token.list();
                     return true;
                 }
@@ -129,7 +130,7 @@ export default class ConsulProvider {
                     return true;
                 }
             }
-        } catch(error){
+        } catch (error) {
 
         }
         return false; // TODO
@@ -147,7 +148,7 @@ export default class ConsulProvider {
             // if (!Policies || !Policies.length) {
             //     throw new Error('no policies');
             // }
-            
+
             // for (const p of Policies) {
             //     const { ID } = p;
             //     const { Rules } = await _consul.acl.policy.read(ID);
@@ -302,6 +303,30 @@ export default class ConsulProvider {
             vscode.window.showErrorMessage(`Failed to get KV value: ${error}`);
             throw error;
         }
+    }
+
+    public async getKeys(key: string): Promise<string[]> {
+        if (!this._consul) {
+            throw new Error('Consul client not initialized');
+        }
+        try {
+            const result: KeysResult = await this._consul.kv.keys(key);
+            return result;
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to get KV keys: ${error}`);
+        }
+        return [];
+    }
+    public async _getKeys(key: string): Promise<string[]> {
+        if (!this._consul) {
+            throw new Error('Consul client not initialized');
+        }
+        try {
+            const result: KeysResult = await this._consul.kv.keys(key);
+            return result;
+        } catch (error) {
+        }
+        return [];
     }
 
     public async setKVValue(key: string, value: string): Promise<boolean> {

@@ -44,7 +44,6 @@ export default class CTreeItem extends BasicTreeItem {
             const items = await this.provider.getKVTree();
             return this.buildKVTree(items);
         }
-
         return this.children || [];
     }
 

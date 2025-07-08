@@ -4,6 +4,10 @@ import KVTreeItem from './treeitem';
 import { ConsulTreeDataProvider } from '../providers/treeDataProvider';
 import vscode from 'vscode';
 
+const STRICT_REGEX = /^(?!\/)(?!.*\/$)(?!.*\/\/)[a-zA-Z0-9\-_.\/]+$/;
+
+const KEY_REG = /^[a-zA-Z0-9\-_.]+$/
+
 export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTreeDataProvider): vscode.Disposable[] => {
     class ConsulKVFileSystemProvider implements vscode.FileSystemProvider {
         private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
@@ -13,7 +17,7 @@ export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTree
         readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
 
         watch(uri: vscode.Uri): vscode.Disposable {
-            return new vscode.Disposable(() => {});
+            return new vscode.Disposable(() => { });
         }
 
         stat(uri: vscode.Uri): vscode.FileStat {
@@ -29,7 +33,7 @@ export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTree
             return [];
         }
 
-        createDirectory(uri: vscode.Uri): void {}
+        createDirectory(uri: vscode.Uri): void { }
 
         async readFile(uri: vscode.Uri): Promise<Uint8Array> {
             const key = KVTreeItem.parseKey(uri);
@@ -95,17 +99,25 @@ export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTree
     const addKVCommand = vscode.commands.registerCommand('consul.addKV', async (node: KVTreeItem) => {
         const provider = node.provider;
         if (provider) {
-            const key = await vscode.window.showInputBox({
+            const key = (await vscode.window.showInputBox({
                 prompt: 'Enter key name',
                 placeHolder: 'e.g., config/app/settings',
-            });
+            }))?.trim();
             try {
                 if (key) {
                     if (key?.startsWith('/') || key?.endsWith('/')) {
                         vscode.window.showErrorMessage('invalid key name');
                         return;
                     }
-                    await provider.addKV(key);
+                    if (!STRICT_REGEX.test(key)) {
+                        vscode.window.showErrorMessage('invalid key name');
+                        return;
+                    }
+                    let keyPath = key;
+                    if (node.key) {
+                        keyPath = node.key + '/' + key;
+                    }
+                    await provider.addKV(keyPath);
                     consulTreeProvider.persistInstances();
                     consulTreeProvider.refresh();
                 }
@@ -122,13 +134,84 @@ export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTree
 
         if (answer === 'Yes' && node.provider) {
             try {
-                await node.provider.deleteKV(node.key);
-                consulTreeProvider.persistInstances();
-                consulTreeProvider.refresh();
-                vscode.window.showInformationMessage('Successfully deleted key');
+                const key = node.key;
+                switch (node.contextValue) {
+                    case 'kvFolder': {
+                        const keys = await node.provider.getKeys(key);
+                        for (const _key of keys) {
+                            await node.provider.deleteKV(_key);
+                        }
+                        consulTreeProvider.persistInstances();
+                        consulTreeProvider.refresh();
+                        vscode.window.showInformationMessage('Successfully deleted folder');
+                        return;
+
+                    }
+                    case 'kvLeaf': {
+                        await node.provider.deleteKV(node.key);
+                        consulTreeProvider.persistInstances();
+                        consulTreeProvider.refresh();
+                        vscode.window.showInformationMessage('Successfully deleted key');
+                        return;
+                    }
+                    default:
+                        vscode.window.showErrorMessage('Invalid key type for deletion');
+                        return;
+                }
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to delete key: ${error}`);
             }
+        }
+    });
+
+    const duplicate = vscode.commands.registerCommand('consul.duplicate', async (node: KVTreeItem) => {
+        const provider = node.provider;
+        if (provider) {
+            const parentKey = node.key;
+            if (!parentKey) {
+                vscode.window.showErrorMessage('No parent key found for duplication');
+                return;
+            }
+            let root = '';
+            const index = parentKey.lastIndexOf('/');
+            if (index > 0) {
+                root = parentKey.substring(0, index) + '/';
+            }
+            const key = (await vscode.window.showInputBox({
+                prompt: 'Enter folder name',
+                placeHolder: '',
+            }))?.trim();
+
+            if (!key || !KEY_REG.test(key)) {
+                vscode.window.showErrorMessage('invalid key name');
+                return;
+            }
+            try {
+                const len = parentKey.length;
+                if (key && key.indexOf('/') < 0) {
+                    const _k = await provider._getKeys(root + key);
+                    if (_k && _k.length > 0) {
+                        vscode.window.showErrorMessage(`Folder '${key}' already exists in '${root}'`);
+                        return;
+                    }
+                    const keys = await provider.getKeys(parentKey);
+                    for (const k of keys) {
+                        const newPath = root + key + k.substring(len);
+                        const value = await provider.getKVValue(k);
+                        await provider.setKVValue(newPath, value || '');
+                    }
+                    consulTreeProvider.persistInstances();
+                    consulTreeProvider.refresh();
+                    vscode.window.showInformationMessage(`Folder '${key}' duplicated successfully in '${root}'`);
+                } else {
+                    vscode.window.showErrorMessage('invalid folder name');
+                    return;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        } else {
+            vscode.window.showErrorMessage('no provider');
         }
     });
 
@@ -191,6 +274,5 @@ export default (context: vscode.ExtensionContext, consulTreeProvider: ConsulTree
             vscode.window.showErrorMessage(`Failed to open KV editor: ${error}`);
         }
     });
-
-    return [addKVCommand, refreshKVCommand, deleteKVCommand, openKVEditorCommand, exportData, importData];
+    return [addKVCommand, refreshKVCommand, deleteKVCommand, openKVEditorCommand, exportData, importData, duplicate];
 };
